@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+python-dotenv
+
+# LangChain / OpenAI
+langchain
+langchain-openai
+
+# Authentication
+passlib[bcrypt]
+python-jose[cryptography]
