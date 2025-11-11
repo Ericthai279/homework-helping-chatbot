@@ -20,3 +20,6 @@ class RoadmapJobResponse(BaseModel):
 
     class Config:
         from_attributes = True # Replaced orm_mode
+
+class CreateRoadmapRequest(BaseModel):
+    learning_target: str

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUKIE AI Tutor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Our new stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- 
+      ================================================================
+      PAGE 1: LOGIN
+      ================================================================
+    -->
+    <div id="login-page" class="page active max-w-lg w-full p-8 bg-white shadow-xl rounded-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Đăng nhập</h1>
+            <p class="text-gray-500 mt-2">Bạn chưa có tài khoản? <a href="#" onclick="showPage('register-page')" class="text-blue-600 font-medium">Đăng ký ngay</a></p>
+        </div>
+        
+        <!-- Social Login Buttons -->
+        <div class="space-y-4">
+            <button class="w-full flex justify-center items-center gap-3 py-3 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <img src="https://placehold.co/20x20/4285F4/4285F4?text=G" alt="Google" class="w-5 h-5 rounded-full"><!-- Placeholder for Google icon -->
+                <span class="font-medium text-gray-700">Đăng nhập bằng Google</span>
+            </button>
+            <button class="w-full flex justify-center items-center gap-3 py-3 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                <img src="https://placehold.co/20x20/1877F2/1877F2?text=f" alt="Facebook" class="w-5 h-5 rounded-full"><!-- Placeholder for Facebook icon -->
+                <span class="font-medium text-gray-700">Đăng nhập bằng Facebook</span>
+            </button>
+        </div>
+
+        <div class="my-6 flex items-center">
+            <div class="flex-grow border-t border-gray-200"></div>
+            <span class="mx-4 text-sm text-gray-400">hoặc tiếp tục bằng email</span>
+            <div class="flex-grow border-t border-gray-200"></div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form">
+            <div class="mb-4">
+                <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="login-email" name="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="mb-4">
+                <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                <input type="password" id="login-password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="flex justify-between items-center mb-6">
+                <label class="flex items-center text-sm text-gray-600">
+                    <input type="checkbox" class="h-4 w-4 text-blue-600 rounded border-gray-300">
+                    <span class="ml-2">Nhớ lần đăng nhập sau</span>
+                </label>
+                <a href="#" class="text-sm font-medium text-blue-600">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Đăng nhập</button>
+            <p id="login-error" class="text-red-500 text-sm mt-4 text-center"></p>
+        </form>
+    </div>
+
+    <!-- 
+      ================================================================
+      PAGE 2: REGISTER
+      ================================================================
+    -->
+    <div id="register-page" class="page max-w-lg w-full p-8 bg-white shadow-xl rounded-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Bắt đầu cuộc hành trình của bạn</h1>
+            <p class="text-gray-500 mt-2">Bạn đã có tài khoản? <a href="#" onclick="showPage('login-page')" class="text-blue-600 font-medium">Đăng nhập</a></p>
+        </div>
+        
+        <!-- Register Form -->
+        <form id="register-form" class="space-y-4">
+            <!-- NOTE: The backend only supports email/password right now. 
+                 These other fields (username, etc.) would need the backend to be updated. -->
+            <div>
+                <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="register-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+                <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                <input type="password" id="register-password" class.="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Đăng ký</button>
+            <p id="register-error" class="text-red-500 text-sm mt-4 text-center"></p>
+        </form>
+    </div>
+
+    <!-- 
+      ================================================================
+      PAGE 3: MAIN CHAT APP
+      ================================================================
+    -->
+    <div id="main-app-page" class="page h-screen w-screen p-4" style="max-height: 100vh; max-width: 100vw;">
+        <div class="flex h-full max-h-full">
+            <!-- Left Panel: Chat Interface -->
+            <div class="flex flex-col flex-1 bg-white rounded-2xl shadow-xl border border-gray-200">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">EDUKIE AI Tutor</h2>
+                </div>
+                
+                <!-- Chat Messages -->
+                <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto">
+                    <!-- Initial Message -->
+                    <div class="flex">
+                        <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
+                            <p>Xin chào! Tôi là Edukie. Hãy nhập bài tập hoặc câu hỏi của bạn vào bên dưới để bắt đầu.</p>
+                        </div>
+                    </div>
+                    <!-- Messages will be added here by JS -->
+                </div>
+                
+                <!-- Chat Input Form -->
+                <form id="chat-form" class="p-4 border-t border-gray-200">
+                    <div class="flex items-center bg-gray-100 rounded-xl p-2">
+                        <button type="button" class="p-2 text-gray-500 hover:text-blue-600 rounded-full">
+                            <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                        <input type="text" id="chat-input" placeholder="Nhập bài tập của bạn ở đây..." class="flex-1 bg-transparent px-4 py-2 border-none focus:outline-none text-gray-800">
+                        <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
+                            <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                    </div>
+                    <p id="chat-state-helper" class="text-xs text-gray-500 mt-2 ml-2">Trạng thái: Đang chờ bài tập mới.</p>
+                </form>
+            </div>
+
+            <!-- Right Panel: User Profile (Simplified) -->
+            <div class="w-80 h-full p-6 bg-blue-500 text-white ml-4 rounded-2xl shadow-xl hidden md:flex flex-col">
+                <div class="text-center mb-6">
+                    <img src="https://placehold.co/100x100/FFFFFF/3B82F6?text=User" alt="User Avatar" class="w-24 h-24 rounded-full mx-auto border-4 border-white/50 mb-4">
+                    <h3 class="text-xl font-semibold">User Name</h3>
+                    <p class="text-blue-100">Học viên (Level 1)</p>
+                </div>
+                <div class="space-y-4 flex-1">
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Thành tựu</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <span>Cửa hàng</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 0120.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.945 13A9.001 9.001 0 0111 20.945V13H20.945z"></path></svg>
+                        <span>Game</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        <span>Nhiệm vụ</span>
+                    </a>
+                </div>
+                <div class="border-t border-blue-400/50 pt-4 space-y-2">
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Trợ giúp</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span>Cài đặt</span>
+                    </a>
+                    <a href="#" onclick="handleLogout()" class="flex items-center gap-4 p-3 rounded-lg hover:bg-blue-600 transition">
+                        <svg class_NAME="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Our new JavaScript file -->
+    <script src="app.js" defer></script>
+
+</body>
+</html>
