@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 
 from db.database import get_db, SessionLocal
-from models.roadmap import RoadmapJob
+from models.job import RoadmapJob
 from models.user import User
-from schemas.roadmap import RoadmapJobResponse
+from schemas.job import RoadmapJobResponse
 from schemas.roadmap import CreateRoadmapRequest # We need to create this schema
 from core.tutor_service import RoadmapService
 from routers.auth import get_current_user

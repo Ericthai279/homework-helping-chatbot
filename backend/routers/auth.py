@@ -1,4 +1,3 @@
-import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -12,7 +11,6 @@ from core.config import settings
 
 # --- Password Hashing & Token utils ---
 from passlib.context import CryptContext
-
 from jose import JWTError, jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
