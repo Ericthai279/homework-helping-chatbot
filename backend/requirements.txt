@@ -1,0 +1,34 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+python-dotenv
+pydantic[email]
+python-multipart
+passlib[argon2]
+
+
+requests
+anyio
+
+# LangChain / ollama
+langchain
+langchain-ollama
+langchain-google-genai
+
+# Authentication
+passlib[bcrypt]
+python-jose[cryptography]
+
+For handling payments
+
+stripe
+
+# We use pysqlite3 for sqlite support,
+
+# but if you use PostgreSQL, you'll need 'psycopg2-binary'
+
+pysqlite3-binary
+
