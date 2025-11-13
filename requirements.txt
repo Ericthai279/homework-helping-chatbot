@@ -9,9 +9,9 @@ pydantic[email]
 python-multipart
 passlib[argon2]
 
-html
-css
-javascript
+# html
+# css
+# javascript
 requests
 anyio
 
@@ -32,5 +32,5 @@ stripe
 
 # but if you use PostgreSQL, you'll need 'psycopg2-binary'
 
-pysqlite3-binary
+# pysqlite3-binary
 
