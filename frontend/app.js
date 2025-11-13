@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // Global state
 let authToken = null;
-let currentExerciseId = null; // <-- RESTORED STATE
+let currentExerciseId = null;
 
 // --- Page Navigation & Auth ---
 function showPage(pageId) {
@@ -69,7 +69,6 @@ registerForm.addEventListener('submit', async (e) => {
         }
         registerForm.reset();
         
-        // Auto-redirect to login
         setTimeout(() => {
             showPage('login-page');
             if(messageEl) {
@@ -88,9 +87,8 @@ registerForm.addEventListener('submit', async (e) => {
 function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
-    currentExerciseId = null; // <-- Reset state
+    currentExerciseId = null;
     showPage('login-page');
-    // Clear old messages on logout
     chatMessages.innerHTML = `
         <div class="flex">
             <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
@@ -100,26 +98,29 @@ function handleLogout() {
     resetChatState();
 }
 
-// --- Image Handling Logic ---
+// --- Image Handling Logic (Converts to Base64) ---
 const fileInput = document.getElementById('file-input');
 const imagePreviewContainer = document.getElementById('image-preview-container');
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image-btn');
-let attachedFile = null;
+let attachedFileBase64 = null; // <-- This will store the base64 string
 
 if(fileInput) {
     fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
         if (file) {
-            // Only allow attaching an image when starting a new exercise
             if (currentExerciseId) {
                 addMessage("You can only attach an image when starting a new exercise.", 'ai', 'error');
                 fileInput.value = null;
                 return;
             }
-            attachedFile = file;
+            
             const reader = new FileReader();
-            reader.onload = (e) => { imagePreview.src = e.target.result; };
+            reader.onload = (e) => {
+                const base64String = e.target.result;
+                imagePreview.src = base64String;
+                attachedFileBase64 = base64String.split(',')[1];
+            };
             reader.readAsDataURL(file);
             imagePreviewContainer.classList.remove('hidden');
         }
@@ -127,8 +128,8 @@ if(fileInput) {
 }
 if(removeImageBtn) {
     removeImageBtn.addEventListener('click', () => {
-        attachedFile = null;
-        if(fileInput) fileInput.value = null; // Clear the file input
+        attachedFileBase64 = null;
+        if(fileInput) fileInput.value = null;
         if(imagePreview) imagePreview.src = "";
         if(imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
     });
@@ -147,48 +148,60 @@ if(chatForm) {
 
         if (currentExerciseId) {
             // --- MODE 1: SUBMITTING AN ANSWER ---
-            if (!message) return; // Must provide an answer
+            if (!message) return;
             handleSubmitAnswer(message);
         } else {
             // --- MODE 2: SUBMITTING A NEW EXERCISE ---
-            if (!message && !attachedFile) return; // Must provide prompt or image
-            handleNewExercise(message, attachedFile);
+            if (!message && !attachedFileBase64) return;
+            handleNewExercise(message, attachedFileBase64);
         }
         
-        // Clear input
         chatInput.value = '';
-        if(removeImageBtn) removeImageBtn.click(); // Clear image (if any)
+        if(removeImageBtn) removeImageBtn.click();
     });
 }
 
 // Submit a new exercise to get a hint
-async function handleNewExercise(prompt, imageFile) {
-    if (prompt) addMessage(prompt, 'user');
+async function handleNewExercise(prompt, base64Image) {
+    // --- THIS IS THE FIX ---
+    // Add the user's messages (text and/or image) to the chat history
+    if (prompt) {
+        addMessage(prompt, 'user');
+    }
+    if (base64Image) {
+        // We need to reconstruct the data URL to display it
+        const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        // We create an HTML string for the image
+        const imageHtml = `<img src="${imageUrl}" alt="Exercise Image" class="w-full h-auto max-w-xs rounded-lg">`;
+        addMessage(imageHtml, 'user');
+    }
+    // --- END OF FIX ---
+
     chatStateHelper.textContent = 'Status: AI is analyzing the exercise...';
     
-    const formData = new FormData();
-    formData.append('prompt', prompt);
-    if (imageFile) {
-        formData.append('image', imageFile);
-    }
+    const payload = {
+        prompt: prompt,
+        base64_image: base64Image
+    };
 
     try {
         const response = await fetch(`${API_BASE_URL}/exercises/`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(payload)
         });
         
         const data = await response.json();
         if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
 
-        // Get the first hint
         addMessage(data.interactions[0].ai_response, 'ai');
         
-        // --- SWITCH TO "ANSWERING" STATE ---
         currentExerciseId = data.id;
         chatStateHelper.textContent = `Status: Working on Exercise #${data.id}. Please enter your answer.`;
-        if(fileInput) fileInput.disabled = true; // Disable image upload while answering
+        if(fileInput) fileInput.disabled = true;
 
     } catch (error) {
         addMessage(`Error: ${error.message}`, 'ai', 'error');
@@ -215,18 +228,14 @@ async function handleSubmitAnswer(answer) {
         const data = await response.json();
         if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
 
-        // Display the check result (Correct/Incorrect)
         addMessage(data.check_response, 'ai', data.is_correct ? 'success' : 'normal');
 
         if (data.is_correct) {
-            // If correct, display the similar exercise
             if (data.suggested_exercise) {
                 addMessage("Good job! Here is a similar exercise for you to practice:\n\n" + data.suggested_exercise, 'ai');
             }
-            // Reset state to "Ready"
             resetChatState();
         } else {
-            // If incorrect, stay in answering state
             chatStateHelper.textContent = `Status: Working on Exercise #${currentExerciseId}. Please try again.`;
         }
 
@@ -241,7 +250,7 @@ async function handleSubmitAnswer(answer) {
 function resetChatState() {
     currentExerciseId = null;
     chatStateHelper.textContent = 'Status: Ready for a new exercise.';
-    if(fileInput) fileInput.disabled = false; // Re-enable image upload
+    if(fileInput) fileInput.disabled = false;
 }
 
 // --- addMessage Function (handles message display) ---
@@ -265,16 +274,17 @@ function addMessage(text, sender = 'ai', type = 'normal') {
     }
     
     // Use pre-wrap to preserve formatting (line breaks, etc.)
-    messageDiv.innerHTML = `<div class="${bubbleClasses}"><p style="white-space: pre-wrap;">${text}</p></div>`;
+    // This also allows it to render the HTML string for the image
+    messageDiv.innerHTML = `<div class="${bubbleClasses}">${
+        sender === 'user' && text.startsWith('<img') ? text : `<p style="white-space: pre-wrap;">${text}</p>`
+    }</div>`;
     chatMessages.appendChild(messageDiv);
     
-    // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // --- Utility (Token Check) ---
 function checkToken(error) {
-    // If 401, token is expired -> logout
     if (error.message.includes('401') || error.message.includes('Could not validate credentials')) {
         handleLogout();
     }
@@ -290,7 +300,6 @@ function init() {
         showPage('login-page');
     }
     
-    // Attach logout events
     const logoutBtn = document.getElementById('logout-btn');
     if(logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
@@ -298,6 +307,34 @@ function init() {
     const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
     if(logoutBtnSidebar) {
         logoutBtnSidebar.addEventListener('click', handleLogout);
+    }
+
+    // --- THIS IS NEW ---
+    // Sidebar Toggle Logic
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+    if (hamburgerBtn && sidebar && overlay) {
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+            overlay.classList.remove('hidden');
+        });
+    }
+
+    if (closeSidebarBtn && sidebar && overlay) {
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        });
+    }
+    
+    if (overlay && sidebar) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        });
     }
 }
 

@@ -20,7 +20,7 @@ class TutorService:
         """
         return ChatOllama(
             base_url="http://localhost:11434",
-            model="llava" # You must run 'ollama pull llava'
+            model="llava-phi3" # You must run 'ollama pull llava'
         )
 
     @classmethod
