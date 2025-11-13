@@ -45,23 +45,106 @@
       ================================================================
     -->
     <div id="register-page" class="page">
-        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
-            <form id="register-form">
-                <div class="mb-4">
+        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl my-12">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">BẮT ĐẦU CUỘC HÀNH TRÌNH CỦA BẠN</h2>
+            <p class="text-center text-gray-600 mb-6">Đăng ký bằng tài khoản email</p>
+            
+            <form id="register-form" class="space-y-4">
+                
+                <div>
+                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">Tên tài khoản</label>
+                    <input type="text" id="register-username" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <div>
                     <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input type="email" id="register-email" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="mb-6">
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
                     <input type="password" id="register-password" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <p class="text-xs text-blue-600 mt-1">Nên sử dụng tối thiểu 8 kí tự gồm chữ và số và kí tự đặc biệt</p>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition">Register</button>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính của bạn?</label>
+                    <div class="flex items-center space-x-6">
+                        <label class="flex items-center">
+                            <input type="radio" name="gender" value="male" class="text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">Nam</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="gender" value="female" class="text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">Nữ</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="gender" value="other" class="text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-gray-700">Khác</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh của bạn?</label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <select id="register-dob-day" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Ngày</option>
+                            </select>
+                        <select id="register-dob-month" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Tháng</option>
+                            </select>
+                        <select id="register-dob-year" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Năm</option>
+                            </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="register-major" class="block text-sm font-medium text-gray-700 mb-1">Ngành học của bạn?</label>
+                    <select id="register-major" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Chọn ngành học</option>
+                        <option value="business">Kinh doanh quốc tế</option>
+                        <option value="it">Công nghệ thông tin</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="design">Thiết kế đồ hoạ</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="register-school" class="block text-sm font-medium text-gray-700 mb-1">Trường học của bạn?</label>
+                    <input type="text" id="register-school" placeholder="Nhập trường học của bạn tại đây" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="space-y-3">
+                    <label class="flex items-start">
+                        <input type="checkbox" id="register-terms" class="mt-1 text-blue-600 focus:ring-blue-500 rounded">
+                        <span class="ml-2 text-sm text-gray-700">Tôi đồng ý với các <a href="#" class="text-blue-600 hover:underline">Điều khoản sử dụng</a> và <a href="#" class="text-blue-600 hover:underline">Chính sách bảo mật</a> của Edukie</span>
+                    </label>
+                    <label class="flex items-start">
+                        <input type="checkbox" id="register-data-sharing" class="mt-1 text-blue-600 focus:ring-blue-500 rounded">
+                        <span class="ml-2 text-sm text-gray-700">Chia sẻ dữ liệu đăng nhập của chúng tôi với các nhà cung cấp nội dung của chúng tôi với mục đích tiếp thị</span>
+                    </label>
+                </div>
+
+                <div class="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="register-recaptcha" class="w-6 h-6 text-blue-600 focus:ring-blue-500 rounded">
+                        <label for="register-recaptcha" class="ml-4 text-sm font-medium text-gray-800">I'm not a robot</label>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        [reCAPTCHA]
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition">Đăng ký</button>
                 <p class="text-center text-sm text-gray-600 mt-4 message"></p>
+            
             </form>
+            
             <p class="text-center text-sm text-gray-600 mt-6">
-                Already have an account? 
-                <a href="#" onclick="showPage('login-page')" class="font-medium text-blue-600 hover:underline">Log in</a>
+                Bạn đã có tài khoản? 
+                <a href="#" onclick="showPage('login-page')" class="font-medium text-blue-600 hover:underline">Đăng nhập</a>
             </p>
         </div>
     </div>
@@ -82,7 +165,6 @@
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-bold text-gray-800">Edukie AI Tutor</h2>
                     
-                    <!-- --- THIS IS NEW --- -->
                     <!-- Hamburger Menu Button (visible on mobile/tablet) -->
                     <button id="hamburger-btn" class="p-2 -mr-2 md:hidden text-gray-600 hover:text-blue-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,9 +173,13 @@
                     </button>
                     <!-- Logout Button (visible on desktop) -->
                     <button id="logout-btn" class="text-sm font-medium text-red-600 hover:underline hidden md:block">Logout</button>
-                    <!-- --- END OF NEW --- -->
                 </div>
                 
+                <!-- --- NEW --- -->
+                <!-- Payment Status Message Area -->
+                <div id="payment-message" class="hidden p-4 m-4 rounded-lg"></div>
+                <!-- --- END NEW --- -->
+
                 <!-- Chat Messages -->
                 <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto">
                     <div class="flex">
@@ -137,7 +223,6 @@
               Right Panel / Sidebar
               ================================================================
             -->
-            <!-- --- THIS SECTION IS UPDATED --- -->
             <div id="sidebar" class="w-80 ml-4 flex-shrink-0">
                 <div class="bg-blue-50 h-full rounded-2xl shadow-xl border border-gray-200 p-6 flex flex-col items-center">
                     <!-- Close Button (visible on mobile/tablet) -->
@@ -152,6 +237,14 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-800">Student Name</h3>
                     <p class="text-sm text-blue-600 font-medium">Level 10</p>
+                    
+                    <!-- --- NEW --- -->
+                    <!-- Go Premium Button -->
+                    <button id="go-premium-btn" class="w-full bg-yellow-400 text-yellow-900 font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition mt-4">
+                        Go Premium ✨
+                    </button>
+                    <!-- --- END NEW --- -->
+
                     <div class="w-full text-left mt-6 text-gray-700 space-y-2">
                         <p><strong>School:</strong> Hoa Sen University</p>
                         <p><strong>Major:</strong> Int'l Business</p>
@@ -188,7 +281,6 @@
                     </div>
                 </div>
             </div>
-            <!-- --- END OF UPDATED SECTION --- -->
         </div>
     </div>
 

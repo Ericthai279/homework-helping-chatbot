@@ -1,5 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
+from datetime import date
 
 # --- User ---
 class UserBase(BaseModel):
@@ -7,10 +8,20 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    
+    # --- NEW FIELDS ---
+    username: str
+    gender: Optional[str] = None
+    date_of_birth: Optional[date] = None # Pydantic will auto-convert "YYYY-MM-DD" string
+    school: Optional[str] = None
+    major: Optional[str] = None
+    # --- END NEW FIELDS ---
 
 class User(UserBase):
     id: int
     is_premium: bool
+    username: str # <-- Add username to the response
+    
 
     class Config:
         from_attributes = True

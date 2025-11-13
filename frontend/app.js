@@ -43,23 +43,62 @@ loginForm.addEventListener('submit', async (e) => {
         if(messageEl) messageEl.textContent = `Error: ${error.message}`;
     }
 });
+
+// --- THIS IS THE UPDATED REGISTER FUNCTION ---
 const registerForm = document.getElementById('register-form');
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = registerForm.querySelector('input[type="email"]').value;
-    const password = registerForm.querySelector('input[type="password"]').value;
-    const messageEl = registerForm.querySelector('.message');
     
+    // --- Get all new form values ---
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const gender = document.querySelector('input[name="gender"]:checked')?.value;
+    
+    // --- Date Formatting Fix ---
+    // We must pad the month and day to be 2 digits (e.g., "YYYY-MM-DD")
+    const dobDay = document.getElementById('register-dob-day').value.padStart(2, '0');
+    const dobMonth = document.getElementById('register-dob-month').value.padStart(2, '0');
+    const dobYear = document.getElementById('register-dob-year').value;
+    const date_of_birth = `${dobYear}-${dobMonth}-${dobDay}`;
+    // --- End of Date Fix ---
+
+    const major = document.getElementById('register-major').value;
+    const school = document.getElementById('register-school').value;
+    const terms = document.getElementById('register-terms').checked;
+    
+    const messageEl = registerForm.querySelector('.message');
+
+    // --- Basic validation ---
+    if (!terms) {
+        if(messageEl) {
+            messageEl.textContent = 'Bạn phải đồng ý với Điều khoản sử dụng và Chính sách bảo mật.';
+            messageEl.style.color = 'red';
+        }
+        return;
+    }
+    // --- This is the data your backend currently accepts ---
+    const payload = {
+        email: email,
+        password: password,
+        username: username,
+        gender: gender,
+        date_of_birth: date_of_birth,
+        major: major,
+        school: school
+    };
     try {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(payload), // Send the complete payload
         });
         
         const data = await response.json();
         
         if (!response.ok) {
+            // This will now show the *specific* error from the backend
+            // e.g., "Username already taken"
             throw new Error(data.detail || 'Registration failed');
         }
         
@@ -84,6 +123,9 @@ registerForm.addEventListener('submit', async (e) => {
         }
     }
 });
+// --- END OF UPDATED FUNCTION ---
+
+
 function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
@@ -290,8 +332,32 @@ function checkToken(error) {
     }
 }
 
-// --- Initial Load ---
+
+// --- THIS IS THE UPDATED INIT FUNCTION ---
 function init() {
+    // --- Populate Date of Birth Dropdowns ---
+    const daySelect = document.getElementById('register-dob-day');
+    const monthSelect = document.getElementById('register-dob-month');
+    const yearSelect = document.getElementById('register-dob-year');
+
+    if(daySelect && monthSelect && yearSelect) {
+        // Populate Days (value is "1", "2", etc.)
+        for (let i = 1; i <= 31; i++) {
+            daySelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+        // Populate Months (value is "1", "2", etc.)
+        for (let i = 1; i <= 12; i++) {
+            monthSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+        // Populate Years (e.g., from 1950 to 2010)
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear - 15; i >= currentYear - 75; i--) {
+            yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+    }
+    // --- End of DOB Population ---
+
+
     const token = localStorage.getItem('edu-token');
     if (token) {
         authToken = token;
@@ -309,7 +375,6 @@ function init() {
         logoutBtnSidebar.addEventListener('click', handleLogout);
     }
 
-    // --- THIS IS NEW ---
     // Sidebar Toggle Logic
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -337,5 +402,6 @@ function init() {
         });
     }
 }
+// --- END OF UPDATED FUNCTION ---
 
 init();

@@ -14,11 +14,8 @@ from core.config import settings
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 
-# --- THIS IS THE WORKAROUND ---
-# We are switching from "bcrypt" to "argon2".
-# argon2 is more modern and does NOT have the 72-byte limit.
+# Using argon2 is a great choice, as you noted.
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-# ------------------------------
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PREFIX}/auth/token")
 
@@ -26,7 +23,6 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
-    # The 72-byte truncation fix is NO LONGER NEEDED.
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -46,26 +42,52 @@ router = APIRouter(
     tags=["auth"]
 )
 
+# --- THIS IS THE UPDATED FUNCTION ---
 @router.post("/register", response_model=user_schema.User)
-def register_user(user: user_schema.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(user_model.User).filter(user_model.User.email == user.email).first()
-    if db_user:
+def register_user(
+    user: user_schema.UserCreate, # <-- This schema now contains all the new fields
+    db: Session = Depends(get_db)
+):
+    # Check if email already exists
+    db_user_email = db.query(user_model.User).filter(user_model.User.email == user.email).first()
+    if db_user_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
     
+    # Check if username already exists
+    db_user_username = db.query(user_model.User).filter(user_model.User.username == user.username).first()
+    if db_user_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already taken"
+        )
+    
     hashed_password = get_password_hash(user.password)
-    new_user = user_model.User(email=user.email, hashed_password=hashed_password)
+    
+    # Create the new user object with all fields from the schema
+    new_user = user_model.User(
+        email=user.email,
+        hashed_password=hashed_password,
+        username=user.username,
+        gender=user.gender,
+        date_of_birth=user.date_of_birth,
+        school=user.school,
+        major=user.major
+    )
         
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
     return new_user
+# --- END OF UPDATED FUNCTION ---
+
 
 @router.post("/token", response_model=token_schema.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # Note: Login still uses email (form_data.username)
     user = db.query(user_model.User).filter(user_model.User.email == form_data.username).first()
     
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -82,7 +104,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-# --- Auth Dependency ---
+# --- Auth Dependency (No changes needed here) ---
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

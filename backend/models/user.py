@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, JSON
+# In models/user.py
+
+from sqlalchemy import Column, Integer, String, Boolean, JSON, Date # <-- Import Date
 from sqlalchemy.orm import relationship
 from db.database import Base
 
@@ -9,6 +11,15 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_premium = Column(Boolean, default=False)
+    
+    # --- NEW FIELDS ---
+    # We make username unique, just like email
+    username = Column(String, unique=True, index=True, nullable=True) 
+    gender = Column(String, nullable=True)
+    date_of_birth = Column(Date, nullable=True)
+    school = Column(String, nullable=True)
+    major = Column(String, nullable=True)
+    # --- END NEW FIELDS ---
 
     # Profile data for premium users (the AI uses this)
     profile_year = Column(String, nullable=True) # e.g., "University Year 1"
