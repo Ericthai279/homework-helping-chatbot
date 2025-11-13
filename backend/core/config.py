@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     # but we leave it here for future use.
     ALLOWED_ORIGINS: str = "" 
 
+    # --- THIS WAS THE FIX ---
+    # I have removed the 'GOOGLE_API_KEY: str' line.
+    # Your project uses Ollama, so this key is not needed 
+    # and was causing a startup crash.
+    # ------------------------
+
     class Config:
         env_file_encoding = "utf-8"
         case_sensitive = True

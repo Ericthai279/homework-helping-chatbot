@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import HumanMessage, SystemMessage
 from core.config import settings
 from core import prompts
-from core import llm_schemas
 from models.user import User
 from dotenv import load_dotenv
 import os
@@ -14,99 +14,112 @@ load_dotenv()
 class TutorService:
 
     @classmethod
-    def _get_llm(cls):
+    def _get_llm_multimodal(cls):
         """
-        This is the new LLM loader for Google Gemini.
+        Load the multimodal (image + text) Ollama model for exercises.
         """
-        return ChatGoogleGenerativeAI(
-            model="gemini-pro-latest", 
-            google_api_key=settings.GOOGLE_API_KEY,
-            temperature=0.7,
-            convert_system_message_to_human=True,
-            
-            # --- THIS IS THE FIX ---
-            # We are disabling the retries to stop spamming
-            # the API when we hit a rate limit.
-            max_retries=1 
-            # ---------------------
+        return ChatOllama(
+            base_url="http://localhost:11434",
+            model="llava" # You must run 'ollama pull llava'
         )
 
     @classmethod
-    def get_initial_guidance(cls, exercise_content: str) -> str:
+    def _get_llm_text_only(cls):
         """
-        Gets the first "hint" for an exercise.
+        Load a faster, text-only Ollama model for other tasks.
         """
-        llm = cls._get_llm()
-        prompt = ChatPromptTemplate.from_template(prompts.GUIDANCE_PROMPT)
+        return ChatOllama(
+            base_url="http://localhost:11434",
+            model="mistral-nemo" # You must run 'ollama pull mistral-nemo'
+        )
+
+    @classmethod
+    async def get_initial_guidance(cls, prompt: str, base64_image: str | None = None) -> str:
+        """
+        Get the initial step-by-step guidance for an exercise.
+        NOW ASYNCHRONOUS.
+        """
+        llm = cls._get_llm_multimodal() # Use 'llava' model
         
-        # We just want a string back, not JSON
+        message_content = []
+        
+        if base64_image:
+            # If there's an image, use the image prompt
+            message_content.append(SystemMessage(content=prompts.GUIDANCE_PROMPT_WITH_IMAGE))
+            message_content.append(HumanMessage(
+                content=[
+                    {"type": "text", "text": prompt}, # Additional prompt (if any)
+                    {
+                        "type": "image_url",
+                        "image_url": { "url": f"data:image/jpeg;base64,{base64_image}" }
+                    }
+                ]
+            ))
+        else:
+            # If text only
+            message_content.append(SystemMessage(content=prompts.GUIDANCE_PROMPT.format(exercise_content=prompt)))
+
+        chain = llm | StrOutputParser()
+        # Use .ainvoke() for async
+        return await chain.ainvoke(message_content)
+
+    @classmethod
+    async def check_user_answer(cls, exercise_content: str, user_answer: str) -> str:
+        """
+        Check if the user's answer is correct or incorrect.
+        NOW ASYNCHRONOUS.
+        """
+        llm = cls._get_llm_text_only() # Use faster text model
+        
+        prompt = ChatPromptTemplate.from_template(prompts.CHECK_ANSWER_PROMPT)
         chain = prompt | llm | StrOutputParser()
         
-        return chain.invoke({"exercise_content": exercise_content})
-
-    @classmethod
-    def check_user_answer(cls, exercise_content: str, user_answer: str) -> llm_schemas.CheckAnswerLLM:
-        """
-        Checks the user's answer and returns a structured response.
-        """
-        llm = cls._get_llm()
-        parser = JsonOutputParser(pydantic_object=llm_schemas.CheckAnswerLLM)
-        
-        prompt = ChatPromptTemplate.from_template(
-            prompts.CHECK_ANSWER_PROMPT,
-            partial_variables={"format_instructions": parser.get_format_instructions()}
-        )
-        
-        chain = prompt | llm | parser
-        
-        return chain.invoke({
+        # Use .ainvoke() for async
+        return await chain.ainvoke({
             "exercise_content": exercise_content,
             "user_answer": user_answer
         })
 
     @classmethod
-    def get_similar_exercise(cls, exercise_content: str) -> llm_schemas.SimilarExerciseLLM:
+    async def get_similar_exercise(cls, exercise_content: str) -> str:
         """
-        Generates a new, similar exercise.
+        Generate a similar exercise.
+        NOW ASYNCHRONOUS.
         """
-        llm = cls._get_llm()
-        parser = JsonOutputParser(pydantic_object=llm_schemas.SimilarExerciseLLM)
+        llm = cls._get_llm_text_only() # Use faster text model
         
-        prompt = ChatPromptTemplate.from_template(
-            prompts.SIMILAR_EXERCISE_PROMPT,
-            partial_variables={"format_instructions": parser.get_format_instructions()}
-        )
+        prompt = ChatPromptTemplate.from_template(prompts.SIMILAR_EXERCISE_PROMPT)
+        chain = prompt | llm | StrOutputParser()
         
-        chain = prompt | llm | parser
-        
-        return chain.invoke({"exercise_content": exercise_content})
+        # Use .ainvoke() for async
+        return await chain.ainvoke({"exercise_content": exercise_content})
+
 
 class RoadmapService:
-
     @classmethod
     def _get_llm(cls):
-        # We can reuse the same LLM logic
-        return TutorService._get_llm()
+        # Roadmap service only needs text, so we use the text model
+        return TutorService._get_llm_text_only()
 
     @classmethod
-    def generate_roadmap(cls, user: User, learning_target: str) -> llm_schemas.RoadmapLLM:
+    async def generate_roadmap(cls, user: User, learning_target: str) -> str:
         """
-        Generates a complete, personalized roadmap (the slow, premium task).
+        Generate a roadmap (text only).
+        NOW ASYNCHRONOUS.
         """
         llm = cls._get_llm()
-        parser = JsonOutputParser(pydantic_object=llm_schemas.RoadmapLLM)
+        
+        # We need a JSON parser for the roadmap, but using Str for now
+        parser = StrOutputParser() 
+        # (Ideally, we'd use JsonOutputParser + Pydantic Schema here)
 
-        prompt = ChatPromptTemplate.from_template(
-            prompts.ROADMAP_PROMPT,
-            partial_variables={"format_instructions": parser.get_format_instructions()}
-        )
-
+        prompt = ChatPromptTemplate.from_template(prompts.ROADMAP_PROMPT)
         chain = prompt | llm | parser
 
-        # Combine user profile data into a readable format
         common_mistakes = ", ".join(user.profile_common_mistakes) if user.profile_common_mistakes else "N/A"
 
-        return chain.invoke({
+        # Use .ainvoke() for async
+        return await chain.ainvoke({
             "profile_year": user.profile_year or "N/A",
             "profile_skill_level": user.profile_skill_level or "N/A",
             "profile_common_mistakes": common_mistakes,
