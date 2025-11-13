@@ -1,34 +1,27 @@
-from typing import List
+from typing import List, Optional, Any
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import model_validator
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings(BaseSettings):
     API_PREFIX: str = "/api"
     DEBUG: bool = False
 
-    # This will be read directly from the environment
-    # e.g., "postgresql://user:password@host:port/db"
     DATABASE_URL: str
 
-    # For JWT Authentication
-    SECRET_KEY: str = "your_secret_key" # Change this!
+    SECRET_KEY: str = "your_secret_key"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
-    ALLOWED_ORIGINS: str = ""
-
-    # This can be for OpenAI or any other LLM service
-    OPENAI_API_KEY: str
-
-    @field_validator("ALLOWED_ORIGINS")
-    def parse_allowed_origins(cls, v: str) -> List[str]:
-        return v.split(",") if v else []
+    # This is not used because main.py is set to ["*"]
+    # but we leave it here for future use.
+    ALLOWED_ORIGINS: str = "" 
 
     class Config:
-        env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
-
 
 settings = Settings()

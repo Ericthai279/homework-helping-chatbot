@@ -4,10 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 
 from db.database import get_db, SessionLocal
-from models.job import RoadmapJob
+from models.roadmap import RoadmapJob  # <-- This import is now correct
 from models.user import User
-from schemas.job import RoadmapJobResponse
-from schemas.roadmap import CreateRoadmapRequest # We need to create this schema
+from schemas.roadmap import RoadmapJobResponse, CreateRoadmapRequest # <-- Correct import
 from core.tutor_service import RoadmapService
 from routers.auth import get_current_user
 
@@ -34,9 +33,10 @@ def generate_roadmap_task(job_id: str, user_id: int, learning_target: str):
 
         try:
             # This is the slow LLM call
-            roadmap_data = RoadmapService.generate_roadmap(user, learning_target)
+            # Note: This returns a string. For JSON, we need to update the service
+            roadmap_string_data = RoadmapService.generate_roadmap(user, learning_target)
             
-            job.roadmap_data = roadmap_data.model_dump() # Store as JSON
+            job.roadmap_data = {"roadmap_text": roadmap_string_data} # Store as JSON
             job.status = "completed"
             job.completed_at = datetime.utcnow()
             
@@ -54,7 +54,7 @@ def generate_roadmap_task(job_id: str, user_id: int, learning_target: str):
 
 @router.post("/create", response_model=RoadmapJobResponse)
 def create_roadmap(
-    request: CreateRoadmapRequest, # Needs schema: schemas/roadmap.py
+    request: CreateRoadmapRequest, 
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)

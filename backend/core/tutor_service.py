@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
-
 from core.config import settings
 from core import prompts
 from core import llm_schemas
@@ -17,19 +16,20 @@ class TutorService:
     @classmethod
     def _get_llm(cls):
         """
-        Your original LLM loader.
-        This checks for Choreo and falls back to default OpenAI.
+        This is the new LLM loader for Google Gemini.
         """
-        # This logic from your StoryGenerator was good, so we keep it.
-        # It's flexible for different deployment environments.
-        openai_api_key = os.getenv("CHOREO_OPENAI_CONNECTION_OPENAI_API_KEY")
-        serviceurl = os.getenv("CHOREO_OPENAI_CONNECTION_SERVICEURL")
-
-        if openai_api_key and serviceurl:
-            return ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, base_url=serviceurl, temperature=0.7)
-
-        # Fallback to the key in the .env file
-        return ChatOpenAI(model="gpt-4o-mini", api_key=settings.OPENAI_API_KEY, temperature=0.7)
+        return ChatGoogleGenerativeAI(
+            model="gemini-pro-latest", 
+            google_api_key=settings.GOOGLE_API_KEY,
+            temperature=0.7,
+            convert_system_message_to_human=True,
+            
+            # --- THIS IS THE FIX ---
+            # We are disabling the retries to stop spamming
+            # the API when we hit a rate limit.
+            max_retries=1 
+            # ---------------------
+        )
 
     @classmethod
     def get_initial_guidance(cls, exercise_content: str) -> str:

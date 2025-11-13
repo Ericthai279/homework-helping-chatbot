@@ -1,157 +1,207 @@
-// API Base URL (assuming your backend is on the same host)
-// If your backend is at http://127.0.0.1:8000, use that.
+// API Base URL
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // Global state
 let authToken = null;
-let currentExerciseId = null;
+let currentExerciseId = null; // <-- RESTORED STATE
 
-// --- Page Navigation ---
+// --- Page Navigation & Auth ---
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
-    document.getElementById(pageId).classList.add('active');
+    const activePage = document.getElementById(pageId);
+    if (activePage) {
+        activePage.classList.add('active');
+    }
 }
-
-// --- Authentication ---
 const loginForm = document.getElementById('login-form');
-const loginError = document.getElementById('login-error');
-
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    loginError.textContent = '';
-    
-    // NOTE: The /token endpoint expects "form-data", not JSON.
-    const formData = new FormData();
-    formData.append('username', document.getElementById('login-email').value);
-    formData.append('password', document.getElementById('login-password').value);
+    const formData = new FormData(loginForm);
+    const messageEl = loginForm.querySelector('.message');
     
     try {
         const response = await fetch(`${API_BASE_URL}/auth/token`, {
             method: 'POST',
-            body: formData
+            body: formData,
         });
         
         const data = await response.json();
-
+        
         if (!response.ok) {
-            throw new Error(data.detail || 'Đăng nhập thất bại');
+            throw new Error(data.detail || 'Login failed');
         }
         
         authToken = data.access_token;
         localStorage.setItem('edu-token', authToken);
-        
-        // On successful login, go to the main app
         showPage('main-app-page');
-
+        loginForm.reset();
+        if(messageEl) messageEl.textContent = '';
+        
     } catch (error) {
-        loginError.textContent = error.message;
+        if(messageEl) messageEl.textContent = `Error: ${error.message}`;
     }
 });
-
 const registerForm = document.getElementById('register-form');
-const registerError = document.getElementById('register-error');
-
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    registerError.textContent = '';
-    
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
+    const email = registerForm.querySelector('input[type="email"]').value;
+    const password = registerForm.querySelector('input[type="password"]').value;
+    const messageEl = registerForm.querySelector('.message');
     
     try {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
         });
         
         const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(data.detail || 'Đăng ký thất bại');
+            throw new Error(data.detail || 'Registration failed');
         }
         
-        // On successful registration, show a message and go to login
-        alert('Đăng ký thành công! Vui lòng đăng nhập.');
-        showPage('login-page');
-
+        if(messageEl) {
+            messageEl.textContent = 'Registration successful! Please log in.';
+            messageEl.style.color = 'green';
+        }
+        registerForm.reset();
+        
+        // Auto-redirect to login
+        setTimeout(() => {
+            showPage('login-page');
+            if(messageEl) {
+                messageEl.textContent = '';
+                messageEl.style.color = '';
+            }
+        }, 2000);
+        
     } catch (error) {
-        registerError.textContent = error.message;
+        if(messageEl) {
+            messageEl.textContent = `Error: ${error.message}`;
+            messageEl.style.color = 'red';
+        }
     }
 });
-
 function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
-    currentExerciseId = null;
+    currentExerciseId = null; // <-- Reset state
     showPage('login-page');
-    document.getElementById('chat-messages').innerHTML = `
+    // Clear old messages on logout
+    chatMessages.innerHTML = `
         <div class="flex">
             <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
-                <p>Xin chào! Tôi là Edukie. Hãy nhập bài tập hoặc câu hỏi của bạn vào bên dưới để bắt đầu.</p>
+                <p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p>
             </div>
         </div>`;
+    resetChatState();
 }
 
-// --- Chat Logic ---
+// --- Image Handling Logic ---
+const fileInput = document.getElementById('file-input');
+const imagePreviewContainer = document.getElementById('image-preview-container');
+const imagePreview = document.getElementById('image-preview');
+const removeImageBtn = document.getElementById('remove-image-btn');
+let attachedFile = null;
+
+if(fileInput) {
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            // Only allow attaching an image when starting a new exercise
+            if (currentExerciseId) {
+                addMessage("You can only attach an image when starting a new exercise.", 'ai', 'error');
+                fileInput.value = null;
+                return;
+            }
+            attachedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => { imagePreview.src = e.target.result; };
+            reader.readAsDataURL(file);
+            imagePreviewContainer.classList.remove('hidden');
+        }
+    });
+}
+if(removeImageBtn) {
+    removeImageBtn.addEventListener('click', () => {
+        attachedFile = null;
+        if(fileInput) fileInput.value = null; // Clear the file input
+        if(imagePreview) imagePreview.src = "";
+        if(imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
+    });
+}
+
+// --- Chat Logic (Tutor Model) ---
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
 const chatStateHelper = document.getElementById('chat-state-helper');
 
-chatForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const message = chatInput.value.trim();
-    if (!message) return;
+if(chatForm) {
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
 
-    if (currentExerciseId === null) {
-        // We are starting a NEW exercise
-        handleNewExercise(message);
-    } else {
-        // We are SUBMITTING an ANSWER to an existing exercise
-        handleSubmitAnswer(message);
+        if (currentExerciseId) {
+            // --- MODE 1: SUBMITTING AN ANSWER ---
+            if (!message) return; // Must provide an answer
+            handleSubmitAnswer(message);
+        } else {
+            // --- MODE 2: SUBMITTING A NEW EXERCISE ---
+            if (!message && !attachedFile) return; // Must provide prompt or image
+            handleNewExercise(message, attachedFile);
+        }
+        
+        // Clear input
+        chatInput.value = '';
+        if(removeImageBtn) removeImageBtn.click(); // Clear image (if any)
+    });
+}
+
+// Submit a new exercise to get a hint
+async function handleNewExercise(prompt, imageFile) {
+    if (prompt) addMessage(prompt, 'user');
+    chatStateHelper.textContent = 'Status: AI is analyzing the exercise...';
+    
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    if (imageFile) {
+        formData.append('image', imageFile);
     }
-    
-    chatInput.value = '';
-});
 
-async function handleNewExercise(content) {
-    addMessage(content, 'user');
-    
     try {
         const response = await fetch(`${API_BASE_URL}/exercises/`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ content })
+            headers: { 'Authorization': `Bearer ${authToken}` },
+            body: formData
         });
         
         const data = await response.json();
-        if (!response.ok) throw new Error(data.detail);
+        if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
 
-        // Save the new exercise ID
-        currentExerciseId = data.id;
+        // Get the first hint
+        addMessage(data.interactions[0].ai_response, 'ai');
         
-        // The first hint is in the interactions array
-        const firstHint = data.interactions[0].ai_response;
-        addMessage(firstHint, 'ai');
-
-        // Update helper text
-        chatStateHelper.textContent = `Trạng thái: Đang chờ câu trảGợi ý, câu trả lời, hoặc bài tập mới: #${currentExerciseId}`;
+        // --- SWITCH TO "ANSWERING" STATE ---
+        currentExerciseId = data.id;
+        chatStateHelper.textContent = `Status: Working on Exercise #${data.id}. Please enter your answer.`;
+        if(fileInput) fileInput.disabled = true; // Disable image upload while answering
 
     } catch (error) {
-        addMessage(`Lỗi: ${error.message}`, 'ai', 'error');
+        addMessage(`Error: ${error.message}`, 'ai', 'error');
+        resetChatState();
         checkToken(error);
     }
 }
 
+// Submit an answer to be checked
 async function handleSubmitAnswer(answer) {
     addMessage(answer, 'user');
-    
+    chatStateHelper.textContent = 'Status: AI is checking your answer...';
+
     try {
         const response = await fetch(`${API_BASE_URL}/exercises/${currentExerciseId}/answer`, {
             method: 'POST',
@@ -159,31 +209,42 @@ async function handleSubmitAnswer(answer) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ answer })
+            body: JSON.stringify({ answer: answer })
         });
-        
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.detail);
 
-        // Add the AI's check/explanation
-        addMessage(data.explanation, 'ai', data.is_correct ? 'success' : 'normal');
+        const data = await response.json();
+        if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
+
+        // Display the check result (Correct/Incorrect)
+        addMessage(data.check_response, 'ai', data.is_correct ? 'success' : 'normal');
 
         if (data.is_correct) {
-            // Exercise is finished!
-            addMessage(`Bài tập đã hoàn thành! Bạn có muốn làm một bài tập tương tự không?\n\n${data.suggested_exercise}`, 'ai', 'success');
-            currentExerciseId = null; // Reset state
-            chatStateHelper.textContent = 'Trạng thái: Đã hoàn thành! Sẵn sàng cho bài tập mới.';
+            // If correct, display the similar exercise
+            if (data.suggested_exercise) {
+                addMessage("Good job! Here is a similar exercise for you to practice:\n\n" + data.suggested_exercise, 'ai');
+            }
+            // Reset state to "Ready"
+            resetChatState();
         } else {
-            // Exercise is not finished, waiting for new answer
-            chatStateHelper.textContent = `Trạng thái: Đang chờ câu trả lời cho Bài tập #${currentExerciseId}`;
+            // If incorrect, stay in answering state
+            chatStateHelper.textContent = `Status: Working on Exercise #${currentExerciseId}. Please try again.`;
         }
 
     } catch (error) {
-        addMessage(`Lỗi: ${error.message}`, 'ai', 'error');
+        addMessage(`Error: ${error.message}`, 'ai', 'error');
+        chatStateHelper.textContent = 'Status: An error occurred.';
         checkToken(error);
     }
 }
 
+// Reset chat state
+function resetChatState() {
+    currentExerciseId = null;
+    chatStateHelper.textContent = 'Status: Ready for a new exercise.';
+    if(fileInput) fileInput.disabled = false; // Re-enable image upload
+}
+
+// --- addMessage Function (handles message display) ---
 function addMessage(text, sender = 'ai', type = 'normal') {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('flex', 'w-full');
@@ -197,13 +258,13 @@ function addMessage(text, sender = 'ai', type = 'normal') {
         if (type === 'error') {
             bubbleClasses += 'bg-red-500 text-white rounded-bl-none';
         } else if (type === 'success') {
-            bubbleClasses += 'bg-green-600 text-white rounded-bl-none';
+            bubbleClasses += 'bg-green-500 text-white rounded-bl-none';
         } else {
-        
             bubbleClasses += 'bg-blue-600 text-white rounded-bl-none';
         }
     }
     
+    // Use pre-wrap to preserve formatting (line breaks, etc.)
     messageDiv.innerHTML = `<div class="${bubbleClasses}"><p style="white-space: pre-wrap;">${text}</p></div>`;
     chatMessages.appendChild(messageDiv);
     
@@ -211,10 +272,10 @@ function addMessage(text, sender = 'ai', type = 'normal') {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// --- Utility ---
+// --- Utility (Token Check) ---
 function checkToken(error) {
-    // If the error is a 401 (unauthorized), log the user out
-    if (error.message.includes('401') || error.message.includes('validate')) {
+    // If 401, token is expired -> logout
+    if (error.message.includes('401') || error.message.includes('Could not validate credentials')) {
         handleLogout();
     }
 }
@@ -228,6 +289,16 @@ function init() {
     } else {
         showPage('login-page');
     }
+    
+    // Attach logout events
+    const logoutBtn = document.getElementById('logout-btn');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
+    if(logoutBtnSidebar) {
+        logoutBtnSidebar.addEventListener('click', handleLogout);
+    }
 }
 
-init(); // Run on page load
+init();
