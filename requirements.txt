@@ -24,7 +24,7 @@ langchain-google-genai
 passlib[bcrypt]
 python-jose[cryptography]
 
-For handling payments
+# For handling payments
 
 stripe
 
