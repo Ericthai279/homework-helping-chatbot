@@ -1,12 +1,23 @@
+// NOTE: This code block replaces the existing logic in your frontend/app.js file.
+
 // API Base URL
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api'; 
 
 // Global state
 let authToken = null;
 let currentExerciseId = null;
+let currentRoadmapJobId = null; 
 
 // --- Page Navigation & Auth ---
 function showPage(pageId) {
+    // FIX: Added 'contact-page' to pages that should take full screen
+    if (pageId === 'home-page' || pageId === 'about-page' || pageId === 'service-page' || pageId === 'shop-page' || pageId === 'contact-page' || pageId === 'chat-page') { 
+        document.body.classList.remove('flex', 'items-center', 'justify-center', 'min-h-screen');
+        document.body.classList.add('flex-col');
+    } else {
+        document.body.classList.add('flex', 'items-center', 'justify-center', 'min-h-screen');
+        document.body.classList.remove('flex-col');
+    }
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
@@ -15,6 +26,8 @@ function showPage(pageId) {
         activePage.classList.add('active');
     }
 }
+// ... (loginForm and registerForm event listeners remain the same) ...
+
 const loginForm = document.getElementById('login-form');
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -35,7 +48,7 @@ loginForm.addEventListener('submit', async (e) => {
         
         authToken = data.access_token;
         localStorage.setItem('edu-token', authToken);
-        showPage('main-app-page');
+        showPage('home-page'); // Go to the new home page
         loginForm.reset();
         if(messageEl) messageEl.textContent = '';
         
@@ -44,7 +57,6 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// --- THIS IS THE UPDATED REGISTER FUNCTION ---
 const registerForm = document.getElementById('register-form');
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -55,13 +67,10 @@ registerForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('register-password').value;
     const gender = document.querySelector('input[name="gender"]:checked')?.value;
     
-    // --- Date Formatting Fix ---
-    // We must pad the month and day to be 2 digits (e.g., "YYYY-MM-DD")
     const dobDay = document.getElementById('register-dob-day').value.padStart(2, '0');
     const dobMonth = document.getElementById('register-dob-month').value.padStart(2, '0');
     const dobYear = document.getElementById('register-dob-year').value;
-    const date_of_birth = `${dobYear}-${dobMonth}-${dobDay}`;
-    // --- End of Date Fix ---
+    const date_of_birth = `${dobYear}-${dobMonth}-${dobYear}`;
 
     const major = document.getElementById('register-major').value;
     const school = document.getElementById('register-school').value;
@@ -69,7 +78,6 @@ registerForm.addEventListener('submit', async (e) => {
     
     const messageEl = registerForm.querySelector('.message');
 
-    // --- Basic validation ---
     if (!terms) {
         if(messageEl) {
             messageEl.textContent = 'Bạn phải đồng ý với Điều khoản sử dụng và Chính sách bảo mật.';
@@ -77,7 +85,6 @@ registerForm.addEventListener('submit', async (e) => {
         }
         return;
     }
-    // --- This is the data your backend currently accepts ---
     const payload = {
         email: email,
         password: password,
@@ -91,14 +98,12 @@ registerForm.addEventListener('submit', async (e) => {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload), // Send the complete payload
+            body: JSON.stringify(payload),
         });
         
         const data = await response.json();
         
         if (!response.ok) {
-            // This will now show the *specific* error from the backend
-            // e.g., "Username already taken"
             throw new Error(data.detail || 'Registration failed');
         }
         
@@ -123,20 +128,22 @@ registerForm.addEventListener('submit', async (e) => {
         }
     }
 });
-// --- END OF UPDATED FUNCTION ---
-
 
 function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
     currentExerciseId = null;
     showPage('login-page');
-    chatMessages.innerHTML = `
-        <div class="flex">
-            <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
-                <p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p>
-            </div>
-        </div>`;
+    
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        chatMessages.innerHTML = `
+            <div class="flex">
+                <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
+                    <p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p>
+                </div>
+            </div>`;
+    }
     resetChatState();
 }
 
@@ -145,7 +152,7 @@ const fileInput = document.getElementById('file-input');
 const imagePreviewContainer = document.getElementById('image-preview-container');
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image-btn');
-let attachedFileBase64 = null; // <-- This will store the base64 string
+let attachedFileBase64 = null; 
 
 if(fileInput) {
     fileInput.addEventListener('change', () => {
@@ -205,21 +212,15 @@ if(chatForm) {
 
 // Submit a new exercise to get a hint
 async function handleNewExercise(prompt, base64Image) {
-    // --- THIS IS THE FIX ---
-    // Add the user's messages (text and/or image) to the chat history
-    if (prompt) {
-        addMessage(prompt, 'user');
-    }
+    if (prompt) { addMessage(prompt, 'user'); }
     if (base64Image) {
-        // We need to reconstruct the data URL to display it
         const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-        // We create an HTML string for the image
         const imageHtml = `<img src="${imageUrl}" alt="Exercise Image" class="w-full h-auto max-w-xs rounded-lg">`;
         addMessage(imageHtml, 'user');
     }
-    // --- END OF FIX ---
 
-    chatStateHelper.textContent = 'Status: AI is analyzing the exercise...';
+    const chatStateHelper = document.getElementById('chat-state-helper');
+    if (chatStateHelper) chatStateHelper.textContent = 'Status: AI is analyzing the exercise...';
     
     const payload = {
         prompt: prompt,
@@ -242,7 +243,7 @@ async function handleNewExercise(prompt, base64Image) {
         addMessage(data.interactions[0].ai_response, 'ai');
         
         currentExerciseId = data.id;
-        chatStateHelper.textContent = `Status: Working on Exercise #${data.id}. Please enter your answer.`;
+        if (chatStateHelper) chatStateHelper.textContent = `Status: Working on Exercise #${data.id}. Please enter your answer.`;
         if(fileInput) fileInput.disabled = true;
 
     } catch (error) {
@@ -255,7 +256,8 @@ async function handleNewExercise(prompt, base64Image) {
 // Submit an answer to be checked
 async function handleSubmitAnswer(answer) {
     addMessage(answer, 'user');
-    chatStateHelper.textContent = 'Status: AI is checking your answer...';
+    const chatStateHelper = document.getElementById('chat-state-helper');
+    if (chatStateHelper) chatStateHelper.textContent = 'Status: AI is checking your answer...';
 
     try {
         const response = await fetch(`${API_BASE_URL}/exercises/${currentExerciseId}/answer`, {
@@ -278,12 +280,12 @@ async function handleSubmitAnswer(answer) {
             }
             resetChatState();
         } else {
-            chatStateHelper.textContent = `Status: Working on Exercise #${currentExerciseId}. Please try again.`;
+            if (chatStateHelper) chatStateHelper.textContent = `Status: Working on Exercise #${currentExerciseId}. Please try again.`;
         }
 
     } catch (error) {
         addMessage(`Error: ${error.message}`, 'ai', 'error');
-        chatStateHelper.textContent = 'Status: An error occurred.';
+        if (chatStateHelper) chatStateHelper.textContent = 'Status: An error occurred.';
         checkToken(error);
     }
 }
@@ -291,12 +293,16 @@ async function handleSubmitAnswer(answer) {
 // Reset chat state
 function resetChatState() {
     currentExerciseId = null;
-    chatStateHelper.textContent = 'Status: Ready for a new exercise.';
+    const chatStateHelper = document.getElementById('chat-state-helper');
+    if (chatStateHelper) chatStateHelper.textContent = 'Status: Ready for a new exercise.';
     if(fileInput) fileInput.disabled = false;
 }
 
 // --- addMessage Function (handles message display) ---
 function addMessage(text, sender = 'ai', type = 'normal') {
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return; 
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('flex', 'w-full');
     
@@ -315,8 +321,6 @@ function addMessage(text, sender = 'ai', type = 'normal') {
         }
     }
     
-    // Use pre-wrap to preserve formatting (line breaks, etc.)
-    // This also allows it to render the HTML string for the image
     messageDiv.innerHTML = `<div class="${bubbleClasses}">${
         sender === 'user' && text.startsWith('<img') ? text : `<p style="white-space: pre-wrap;">${text}</p>`
     }</div>`;
@@ -332,8 +336,100 @@ function checkToken(error) {
     }
 }
 
+// --- ROADMAP HANDLER FUNCTIONS ---
 
-// --- THIS IS THE UPDATED INIT FUNCTION ---
+// Function to handle the form submission and start the roadmap job
+async function handleRoadmapRequest(e) {
+    e.preventDefault();
+    const target = document.getElementById('learning-target-input').value.trim();
+    const statusEl = document.getElementById('roadmap-status');
+    const displayEl = document.getElementById('roadmap-display');
+    const generateBtn = document.getElementById('generate-roadmap-btn');
+
+    if (!target) {
+        statusEl.textContent = 'Please enter your learning target.';
+        statusEl.classList.remove('hidden');
+        statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
+        return;
+    }
+    
+    // Reset previous status/display
+    statusEl.textContent = 'Starting roadmap generation...';
+    statusEl.classList.remove('hidden', 'bg-red-100', 'bg-green-100');
+    statusEl.classList.add('bg-blue-100', 'text-blue-700');
+    displayEl.classList.add('hidden');
+    displayEl.innerHTML = '<h4 class="font-semibold text-blue-600">Generated Roadmap:</h4>';
+    generateBtn.disabled = true;
+
+    try {
+        // 1. Create the roadmap job
+        let response = await fetch(`${API_BASE_URL}/roadmaps/create`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ learning_target: target })
+        });
+        
+        let data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to start roadmap job.');
+        }
+
+        currentRoadmapJobId = data.job_id;
+        statusEl.textContent = `Roadmap job created (${currentRoadmapJobId}). Status: Pending...`;
+        
+        // 2. Poll for the status
+        const pollingInterval = 3000; // Check every 3 seconds
+
+        const checkStatus = setInterval(async () => {
+            let statusResponse = await fetch(`${API_BASE_URL}/roadmaps/${currentRoadmapJobId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            let statusData = await statusResponse.json();
+
+            statusEl.textContent = `Roadmap job (${statusData.job_id}). Status: ${statusData.status}...`;
+
+            if (statusData.status === 'completed') {
+                clearInterval(checkStatus);
+                statusEl.textContent = 'Roadmap successfully generated!';
+                statusEl.classList.remove('bg-blue-100');
+                statusEl.classList.add('bg-green-100', 'text-green-700');
+                
+                // Display the roadmap text
+                if (statusData.roadmap_data && statusData.roadmap_data.roadmap_text) {
+                    const roadmapText = statusData.roadmap_data.roadmap_text;
+                    const formattedHtml = roadmapText.replace(/\n/g, '<br>');
+                    displayEl.innerHTML += `<p class="whitespace-pre-wrap text-gray-700 mt-2">${formattedHtml}</p>`;
+                    displayEl.classList.remove('hidden');
+                } else {
+                    displayEl.innerHTML += '<p class="text-red-500 mt-2">Error: Could not retrieve roadmap data.</p>';
+                }
+                generateBtn.disabled = false;
+
+            } else if (statusData.status === 'failed') {
+                clearInterval(checkStatus);
+                statusEl.textContent = `Roadmap job failed: ${statusData.error || 'Unknown server error.'}`;
+                statusEl.classList.remove('bg-blue-100');
+                statusEl.classList.add('bg-red-100', 'text-red-700');
+                generateBtn.disabled = false;
+            }
+
+        }, pollingInterval);
+
+
+    } catch (error) {
+        statusEl.textContent = `Error: ${error.message}`;
+        statusEl.classList.remove('bg-blue-100');
+        statusEl.classList.add('bg-red-100', 'text-red-700');
+        generateBtn.disabled = false;
+        checkToken(error);
+    }
+}
+
+// --- Initial Load ---
 function init() {
     // --- Populate Date of Birth Dropdowns ---
     const daySelect = document.getElementById('register-dob-day');
@@ -361,11 +457,12 @@ function init() {
     const token = localStorage.getItem('edu-token');
     if (token) {
         authToken = token;
-        showPage('main-app-page');
+        showPage('home-page');
     } else {
         showPage('login-page');
     }
     
+    // --- Logout Button Listeners ---
     const logoutBtn = document.getElementById('logout-btn');
     if(logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
@@ -374,8 +471,12 @@ function init() {
     if(logoutBtnSidebar) {
         logoutBtnSidebar.addEventListener('click', handleLogout);
     }
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+    if(navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', handleLogout);
+    }
 
-    // Sidebar Toggle Logic
+    // --- Sidebar Toggle Logic ---
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const hamburgerBtn = document.getElementById('hamburger-btn');
@@ -400,6 +501,36 @@ function init() {
             sidebar.classList.remove('open');
             overlay.classList.add('hidden');
         });
+    }
+
+    // --- ROADMAP LISTENERS (NEW) ---
+    const roadmapModal = document.getElementById('roadmap-modal');
+    const roadmapForm = document.getElementById('roadmap-form');
+    const goPremiumBtn = document.getElementById('go-premium-btn');
+    const closeRoadmapBtn = document.getElementById('close-roadmap-btn');
+
+    // Show modal when "Go Premium" is clicked (to test roadmap feature)
+    if (goPremiumBtn) {
+        // The payments are disabled, so we reuse this button for the roadmap feature test
+        goPremiumBtn.addEventListener('click', () => {
+            if (roadmapModal) roadmapModal.classList.remove('hidden');
+            // Ensure status and display are reset when opened
+            document.getElementById('roadmap-status').classList.add('hidden');
+            document.getElementById('roadmap-display').classList.add('hidden');
+            document.getElementById('generate-roadmap-btn').disabled = false;
+        });
+    }
+
+    // Close modal
+    if (closeRoadmapBtn && roadmapModal) {
+        closeRoadmapBtn.addEventListener('click', () => {
+            roadmapModal.classList.add('hidden');
+        });
+    }
+
+    // Handle form submission
+    if (roadmapForm) {
+        roadmapForm.addEventListener('submit', handleRoadmapRequest);
     }
 }
 // --- END OF UPDATED FUNCTION ---
