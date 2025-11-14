@@ -304,27 +304,26 @@
     -->
     <div id="home-page" class="page w-full">
         <main class="max-w-7xl mx-auto py-12 px-4 space-y-24">
-            <!-- Hero Section -->
-            <section class="flex flex-col lg:flex-row items-center justify-between gap-12">
-                <div class="lg:w-1/2 space-y-6">
-                    <h1 class="text-7xl font-extrabold text-[#0259dd] leading-tight">
+                       <!-- Hero Section --><section class="flex flex-col items-center justify-center gap-12"> <!-- Adjusted flex-col and justify-center --><div class="lg:w-3/4 space-y-6 text-center"> <!-- Center align text for better look --><h1 class="text-7xl font-extrabold text-[#0259dd] leading-tight">
                         EDUKIE - Nền tảng học tập <span class="text-gray-800">Hiểu-Học-Chủ Động</span>
                     </h1>
-                    <p class="text-xl text-gray-600 leading-relaxed">
+                    <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
                         Edukie là nền tảng học tập thông minh sử dụng trí tuệ nhân tạo (AI) để hướng dẫn sinh viên, học sinh tự học chủ động và hiệu quả.
                     </p>
-                    <!-- UPDATED: Call checkAuthAndNavigate for the Chat Page -->
-                    <button onclick="checkAuthAndNavigate('chat-page')" class="bg-[#0259dd] text-white px-8 py-4 text-xl font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition">
+                    <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                        Người dùng chỉ cần tải lên hoặc chụp ảnh bài tập, hệ thống sẽ phân tích - hướng dẫn chi tiết từng bước giải – đồng thời giải thích khái niệm, gợi ý mẹo học và tài liệu liên quan.
+                    </p>
+                    <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                        Mục tiêu của Edukie là giúp người học hiểu sâu, nhớ lâu, tự tin áp dụng kiến thức thay vì phụ thuộc vào lời giải có sẵn.
+                    </p>
+                    <!-- UPDATED: Call checkAuthAndNavigate for the Chat Page --><button onclick="checkAuthAndNavigate('chat-page')" class="bg-[#0259dd] text-white px-8 py-4 text-xl font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition">
                         SỬ DỤNG MIỄN PHÍ NGAY HÔM NAY
                     </button>
                 </div>
-                <div class="lg:w-1/2">
-                    <!-- Placeholder for the large Hero Image -->
-                    <div class="bg-gray-200 h-96 w-full rounded-xl flex items-center justify-center text-gray-500 font-bold">
-                        [Hero Image Placeholder - Open Beta]
-                    </div>
+                <!-- IMAGE IS NOW IN ITS OWN LINE BELOW THE TEXT AND BUTTONS --><div class="w-full mt-10"> <!-- Added mt-10 for spacing --><img src="/static/images/home_hero.png" alt="Edukie Hero Illustration" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://placehold.co/800x400/D1D5DB/6B7280?text=Hero+Image+Missing';">
                 </div>
             </section>
+
 
             <!-- 2. Banner Section (The blue/purple open beta banner) -->
             <section class="text-center relative">
@@ -337,53 +336,46 @@
                 </div>
             </section>
 
-            <!-- 3. TÍNH NĂNG NỔI BẬT (Feature Cards) -->
-            <section>
-                <h2 class="text-4xl font-bold text-gray-800 text-center mb-12">TÍNH NĂNG NỔI BẬT</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    
-                    <!-- Card 1: AI Hướng Dẫn Chuyên Sâu -->
-                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-                        <div class="w-32 h-32 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">🤖</div>
-                        <h3 class="text-xl font-semibold text-[#0259dd] mb-2">AI hướng dẫn chuyên sâu</h3>
-                        <p class="text-gray-600">Giải thích bài tập, lý thuyết về cuối và phân tích để hướng dẫn từng bước.</p>
-                    </div>
-                    
-                    <!-- Card 2: Thư Viện Học Tập Cá Nhân Hóa -->
-                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-                        <div class="w-32 h-32 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">📚</div>
-                        <h3 class="text-xl font-semibold text-[#0259dd] mb-2">Thư viện học tập cá nhân hóa</h3>
-                        <p class="text-gray-600">Roadmap học tập, gợi ý bài luyện tập phù hợp trình độ.</p>
-                    </div>
+           <!-- 3. TÍNH NĂNG NỔI BẬT (Feature Cards) --><section>
+            <h2 class="text-4xl font-bold text-gray-800 text-center mb-12">TÍNH NĂNG NỔI BẬT</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Card 1: AI Hướng Dẫn Chuyên Sâu --><div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-40 h-40 mx-auto mb-4 bg-blue-100 rounded-xl flex items-center justify-center"> <!-- Changed to w-40 h-40 rounded-xl --><!-- Thay thế Emoji bằng đường dẫn ảnh --><img src="/static/images/feature_ai.png" alt="AI Mentor Icon" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='🤖';"> <!-- Changed to w-28 h-28 --></div>
+                    <h3 class="text-xl font-semibold text-[#0259dd] mb-2">AI hướng dẫn chuyên sâu</h3>
+                    <p class="text-gray-600">Giải thích bài tập, lý thuyết về cuối và phân tích để hướng dẫn từng bước.</p>
+                </div>
+                
+                <!-- Card 2: Thư Viện Học Tập Cá Nhân Hóa --><div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-40 h-40 mx-auto mb-4 bg-orange-100 rounded-xl flex items-center justify-center"> <!-- Changed to w-40 h-40 rounded-xl --><!-- Thay thế Emoji bằng đường dẫn ảnh --><img src="/static/images/feature_library.png" alt="Library Icon" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='📚';"> <!-- Changed to w-28 h-28 --></div>
+                    <h3 class="text-xl font-semibold text-[#0259dd] mb-2">Thư viện học tập cá nhân hóa</h3>
+                    <p class="text-gray-600">Roadmap học tập, gợi ý bài luyện tập phù hợp trình độ.</p>
+                </div>
 
-                    <!-- Card 3: Tương Tác Học Tập Tự Nhiên -->
-                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
-                        <div class="w-32 h-32 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">💬</div>
-                        <h3 class="text-xl font-semibold text-[#0259dd] mb-2">Tương tác học tập tự nhiên</h3>
-                        <p class="text-gray-600">Giao tiếp, hỏi đáp chuyên sâu, học sinh tự học chủ động, giống như chat với bạn bè.</p>
-                    </div>
+                <!-- Card 3: Tương Tác Học Tập Tự Nhiên --><div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-40 h-40 mx-auto mb-4 bg-green-100 rounded-xl flex items-center justify-center"> <!-- Changed to w-40 h-40 rounded-xl --><!-- Thay thế Emoji bằng đường dẫn ảnh --><img src="/static/images/feature_chat.png" alt="Chat Icon" class="w-28 h-28 object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='💬';"> <!-- Changed to w-28 h-28 --></div>
+                    <h3 class="text-xl font-semibold text-[#0259dd] mb-2">Tương tác học tập tự nhiên</h3>
+                    <p class="text-gray-600">Giao tiếp, hỏi đáp chuyên sâu, học sinh tự học chủ động, giống như chat với bạn bè.</p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 4. EDUKIE ĐÃ GIÚP (Stats Section) -->
-            <section class="flex items-center justify-between bg-white p-10 rounded-xl shadow-xl">
-                <div class="lg:w-1/2 space-y-6">
-                    <h2 class="text-3xl font-bold text-[#0259dd]">
-                        EDUKIE ĐÃ GIÚP SINH VIÊN HỌC HIỆU QUẢ HƠN NHƯ THẾ NÀO?
-                    </h2>
-                    <div class="space-y-4">
-                        <p class="text-lg font-semibold text-gray-700">62% NGƯỜI HỌC CẢM THẤY HIỂU BÀI HƠN</p>
-                        <p class="text-lg font-semibold text-gray-700">100 SINH VIÊN ĐÃ SỬ DỤNG</p>
-                        <p class="text-lg font-semibold text-gray-700">8K LƯỢT HƯỚNG DẪN ĐÃ ĐƯỢC MỤC TIÊU ĐẠT 8K</p>
-                    </div>
+        <!-- 4. EDUKIE ĐÃ GIÚP (Stats Section) --><section class="flex items-center justify-between bg-white p-10 rounded-xl shadow-xl">
+            <div class="lg:w-1/2 space-y-6">
+                <h2 class="text-3xl font-bold text-[#0259dd]">
+                    EDUKIE ĐÃ GIÚP SINH VIÊN HỌC HIỆU QUẢ HƠN NHƯ THẾ NÀO?
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-lg font-semibold text-gray-700">62% NGƯỜI HỌC CẢM THẤY HIỂU BÀI HƠN</p>
+                    <p class="text-lg font-semibold text-gray-700">100 SINH VIÊN ĐÃ SỬ DỤNG</p>
+                    <p class="text-lg font-semibold text-gray-700">8K LƯỢT HƯỚNG DẪN ĐÃ ĐƯỢC MỤC TIÊU ĐẠT 8K</p>
                 </div>
-                <div class="lg:w-1/2 flex justify-end">
-                    <!-- Placeholder for the large Stats Illustration -->
-                    <div class="w-64 h-64 bg-yellow-100 rounded-full flex items-center justify-center text-gray-500 font-bold">
-                        [Stats Image Placeholder]
-                    </div>
+            </div>
+            <div class="lg:w-1/2 flex justify-end">
+                <!-- Placeholder for the large Stats Illustration --><div class="w-80 h-80 bg-yellow-100 rounded-full flex items-center justify-center text-gray-500 font-bold"> <!-- Changed to w-80 h-80 --><!-- Thêm hình ảnh Stats --><img src="/static/images/home_stats.png" alt="Stats Illustration" class="w-full h-full object-cover rounded-full" onerror="this.onerror=null; this.src='https://placehold.co/300x300/FDE68A/CA8A04?text=Stats+Image+Missing';">
                 </div>
-            </section>
+            </div>
+        </section>
 
             <!-- 5. Feedback/Testimonial Section -->
             <section>
