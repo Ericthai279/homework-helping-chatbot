@@ -1,4 +1,5 @@
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI # CORRECT GEMINI IMPORT
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -17,26 +18,29 @@ class TutorService:
     @classmethod
     def _get_llm_multimodal(cls):
         """
-        Load the multimodal (image + text) model using GPT-4o.
+        Load the multimodal (image + text) model using Gemini 2.5 Flash.
         """
-        # Ensure OPENAI_API_KEY is available in Render/local env
-        return ChatOpenAI(
-            model="gpt-4o",
-            openai_api_key=os.getenv("OPENAI_API_KEY")
+        # FIX 1: Use the correct model and refer to GOOGLE_API_KEY
+        return ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            google_api_key=os.getenv("GOOGLE_API_KEY")
         )
 
     @classmethod
     def _get_llm_text_only(cls):
         """
-        Load a faster, text-only model using GPT-3.5 Turbo.
+        Load a faster, text-only model using Gemini 2.5 Flash-Lite.
         """
-        return ChatOpenAI(
-            model="gpt-3.5-turbo",
-            openai_api_key=os.getenv("OPENAI_API_KEY")
+        # FIX 2: Switched this back to the faster, text-only Gemini model 
+        # (Since you are transitioning to Gemini and the OpenAI key is not working)
+        return ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash-lite", 
+            google_api_key=os.getenv("GOOGLE_API_KEY")
         )
 
     @classmethod
     async def get_initial_guidance(cls, prompt: str, base64_image: str | None = None) -> str:
+        # Use the multimodal method (which uses the Gemini key)
         llm = cls._get_llm_multimodal() 
         message_content = []
         

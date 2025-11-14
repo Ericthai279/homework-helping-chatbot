@@ -17,6 +17,7 @@ anyio
 langchain
 langchain-ollama
 langchain-google-genai
+langchain-openai
 
 # Authentication
 passlib[bcrypt]

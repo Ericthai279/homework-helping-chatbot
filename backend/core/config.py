@@ -15,14 +15,17 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 
 
-    # FIX: Include the required AI key
-    OPENAI_API_KEY: str
+    # FIX: This requires the GOOGLE_API_KEY from the environment/dotenv.
+    # The old OPENAI_API_KEY field is REMOVED to prevent conflict.
+    GOOGLE_API_KEY: str
 
-    # --- FIX: Stripe keys are commented out to disable payments ---
+    # --- STRIPE KEYS (DISABLED) ---
+    # Since these fields are commented out, Pydantic ignores them.
+    # This prevents the 'Extra inputs are not permitted' error for Stripe/Old Google keys.
     # STRIPE_SECRET_KEY: str
     # STRIPE_PRICE_ID: str
     # STRIPE_WEBHOOK_SECRET: str
-    # --- END OF FIX ---
+    # --- END STRIPE FIX ---
 
     ALLOWED_ORIGINS: str = "" 
     
