@@ -26,6 +26,11 @@ function injectGlobalComponents() {
 
 // --- Page Navigation & Auth ---
 function showPage(pageId) {
+    // Clear any active QR timer before switching pages
+    if (document.getElementById('payment-qr-page')?.dataset.timerInterval) {
+        clearInterval(document.getElementById('payment-qr-page').dataset.timerInterval);
+    }
+    
     // Layout handling
     if (pageId === 'login-page' || pageId === 'register-page') {
         document.body.classList.add('flex', 'items-center', 'justify-center', 'min-h-screen');
@@ -55,7 +60,30 @@ function showPage(pageId) {
         }
         setupPaymentPageLogic();
     }
+    if (pageId === 'payment-qr-page') {
+        setupPaymentQrPage();
+    }
 }
+
+// NEW: Function to check auth status before navigating to a protected page (like chat)
+function checkAuthAndNavigate(pageId) {
+    if (pageId === 'chat-page' && !authToken) {
+        // If the user wants to access chat without a token, redirect to register/login
+        showPage('register-page');
+        const messageEl = document.getElementById('register-form')?.querySelector('.message');
+        if (messageEl) {
+            messageEl.textContent = 'Please register or log in to use the Chatbot service.';
+            messageEl.style.color = 'orange';
+        }
+    } else if (pageId === 'chat-page' && authToken) {
+        // If authenticated, go to chat
+        showPage('chat-page');
+    } else {
+        // For all other pages, just navigate
+        showPage(pageId);
+    }
+}
+
 
 // Navigation active state
 function setNavigationActiveState(currentPageId) {
@@ -63,7 +91,7 @@ function setNavigationActiveState(currentPageId) {
     const header = document.querySelector('header');
 
     document.querySelectorAll('header nav a').forEach(a => {
-        a.classList.remove('text-[#0259dd]', 'text-white');
+        a.classList.remove('text-[#0259dd]', 'text-white', 'font-bold'); 
         a.classList.add('text-gray-600');
     });
 
@@ -71,7 +99,10 @@ function setNavigationActiveState(currentPageId) {
         if (currentPageId === 'service-page') {
             header.classList.remove('bg-[#fffdf5]', 'border-gray-200');
             header.classList.add('bg-[#0259dd]');
-            document.querySelectorAll('header nav a').forEach(a => a.classList.add('text-white/80'));
+            document.querySelectorAll('header nav a').forEach(a => {
+                a.classList.remove('text-gray-600');
+                a.classList.add('text-white/80');
+            });
             document.getElementById('global-logout-btn')?.classList.remove('text-white', 'bg-[#0259dd]');
             document.getElementById('global-logout-btn')?.classList.add('bg-white', 'text-[#0259dd]');
         } else {
@@ -91,82 +122,168 @@ function setNavigationActiveState(currentPageId) {
     }
 }
 
-// --- PAYMENT PAGE LOGIC (FULLY INTEGRATED) ---
 function setupPaymentPageLogic() {
     const paymentPage = document.getElementById('payment-page');
     if (!paymentPage) return;
-  
-    // Load Lucide once
-    if (typeof lucide === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
-      script.onload = () => lucide.createIcons({ attrs: { width: 24, height: 24 } });
-      document.head.appendChild(script);
-    } else {
-      lucide.createIcons({ attrs: { width: 24, height: 24 } });
+    
+    // Load Lucide (Check if needed again due to page switch logic)
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
-  
+    
     const radioInputs = paymentPage.querySelectorAll('input[name="payment_method"]');
     const paymentLabels = paymentPage.querySelectorAll('.payment-card-label');
-  
+    
     function updateSelection(selectedId) {
-      paymentLabels.forEach(label => {
-        const input = document.getElementById(label.getAttribute('for'));
-        const radioDot = label.querySelector('.custom-radio-input > div');
-        const card = label.querySelector('div[class*="p-5"]');
-  
-        if (input.id === selectedId) {
-          card.classList.add('border-blue-600', 'shadow-md');
-          card.classList.remove('border-gray-300');
-          radioDot.classList.remove('hidden');
-        } else {
-          card.classList.remove('border-blue-600', 'shadow-md');
-          card.classList.add('border-gray-300');
-          radioDot.classList.add('hidden');
-        }
-      });
+        paymentLabels.forEach(label => {
+            const input = document.getElementById(label.getAttribute('for'));
+            const radioDot = label.querySelector('.custom-radio-input > div');
+            const card = label.querySelector('div[class*="p-5"]');
+    
+            if (input.id === selectedId) {
+                card.classList.add('border-blue-600', 'shadow-md');
+                card.classList.remove('border-gray-300');
+                radioDot.classList.remove('hidden');
+            } else {
+                card.classList.remove('border-blue-600', 'shadow-md');
+                card.classList.add('border-gray-300');
+                radioDot.classList.add('hidden');
+            }
+        });
     }
-  
-    // Set initial state
+    
+    // Initial state
     const checked = paymentPage.querySelector('input[name="payment_method"]:checked');
     if (checked) updateSelection(checked.id);
-  
-    // Re-attach listeners (clone to avoid duplicates)
-    radioInputs.forEach(input => input.replaceWith(input.cloneNode(true)));
-    paymentLabels.forEach(label => label.replaceWith(label.cloneNode(true)));
-  
-    // Re-select after cloning
-    const newInputs = paymentPage.querySelectorAll('input[name="payment_method"]');
-    const newLabels = paymentPage.querySelectorAll('.payment-card-label');
-  
-    newInputs.forEach(input => {
-      input.addEventListener('change', () => updateSelection(input.id));
-    });
-  
-    newLabels.forEach(label => {
-      label.addEventListener('click', () => {
-        const input = document.getElementById(label.getAttribute('for'));
-        if (input) {
-          input.checked = true;
-          updateSelection(input.id);
-        }
-      });
-    });
-  }
+    
+    // Clear and re-attach listeners:
+    const currentInputs = paymentPage.querySelectorAll('input[name="payment_method"]');
+    const currentLabels = paymentPage.querySelectorAll('.payment-card-label');
 
-// --- Service Action (Login Required) ---
-function handleServiceAction(action) {
-    if (authToken) {
-        showPage('chat-page');
-    } else {
-        showPage('register-page');
-        const messageEl = document.getElementById('register-form').querySelector('.message');
-        if (messageEl) {
-            messageEl.textContent = 'Please register or log in to use the Chatbot service.';
-            messageEl.style.color = 'orange';
+    currentInputs.forEach(input => {
+        input.removeEventListener('change', updateSelection); // Remove old listener
+        input.addEventListener('change', () => updateSelection(input.id));
+    });
+    
+    currentLabels.forEach(label => {
+        label.removeEventListener('click', handleLabelClick); // Remove old listener
+        label.addEventListener('click', handleLabelClick);
+    });
+
+    function handleLabelClick() {
+        const input = document.getElementById(this.getAttribute('for'));
+        if (input) {
+            input.checked = true;
+            updateSelection(input.id);
         }
     }
+    
+    // === CONTINUE PAYMENT BUTTON ===
+    const continueBtn = paymentPage.querySelector('#continue-payment-btn');
+    if (continueBtn) {
+        // Ensure only one listener is attached
+        continueBtn.removeEventListener('click', handleContinuePayment); 
+        continueBtn.addEventListener('click', handleContinuePayment);
+    }
 }
+
+function handleContinuePayment() {
+    const paymentPage = document.getElementById('payment-page');
+    const selectedMethod = paymentPage.querySelector('input[name="payment_method"]:checked');
+            
+    if (!selectedMethod) {
+        alert('Vui lòng chọn phương thức thanh toán');
+        return;
+    }
+    
+    const method = selectedMethod.id;
+    
+    if (method === 'momo') {
+        showPage('payment-qr-page');
+    } 
+    else if (method === 'card') {
+        alert('Thanh toán bằng thẻ tín dụng đang phát triển...');
+    }
+    else if (method === 'bank') {
+        alert('Chuyển khoản ngân hàng đang phát triển...');
+    }
+}
+
+// ==================== PAYMENT QR PAGE LOGIC ====================
+function setupPaymentQrPage() {
+    const qrPage = document.getElementById('payment-qr-page');
+    if (!qrPage) return;
+    
+    // Load Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Back button
+    const backBtn = qrPage.querySelector('#qr-back-btn');
+    backBtn?.removeEventListener('click', handleQrBack);
+    backBtn?.addEventListener('click', handleQrBack);
+    
+    // Confirm button
+    const confirmBtn = qrPage.querySelector('#confirm-payment-btn');
+    confirmBtn?.removeEventListener('click', handleQrConfirm);
+    confirmBtn?.addEventListener('click', handleQrConfirm);
+
+    // Reset countdown state and start new timer
+    qrPage.dataset.timerInterval = '';
+    
+    // === FAKE QR + COUNTDOWN (Replace with real API later) ===
+    const qrImg = qrPage.querySelector('#momo-qr-code');
+    const timerEl = qrPage.querySelector('#qr-timer');
+    
+    // Fake QR (replace with real data URL from backend)
+    qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=99000&note=Edukie-nang-cao';
+    
+    // Countdown: 10 minutes
+    let seconds = 600;
+    
+    // Ensure countdown display is reset
+    timerEl.textContent = '10:00';
+    timerEl.parentElement.classList.replace('bg-gray-100', 'bg-red-50');
+    timerEl.parentElement.classList.replace('text-gray-500', 'text-red-700');
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+    const interval = setInterval(() => {
+        seconds--;
+        const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const secs = String(seconds % 60).padStart(2, '0');
+        timerEl.textContent = `${mins}:${secs}`;
+    
+        if (seconds <= 0) {
+            clearInterval(interval);
+            timerEl.textContent = 'Hết hạn';
+            timerEl.parentElement.classList.replace('bg-red-50', 'bg-gray-100');
+            timerEl.parentElement.classList.replace('text-red-700', 'text-gray-500');
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }, 1000);
+    
+    // Store interval to clear later if needed
+    qrPage.dataset.timerInterval = interval;
+}
+
+function handleQrBack(e) {
+    e.preventDefault();
+    showPage('payment-page'); // Always go back to payment method selection
+}
+
+function handleQrConfirm() {
+    // Clear interval when confirmed
+    if (document.getElementById('payment-qr-page')?.dataset.timerInterval) {
+        clearInterval(document.getElementById('payment-qr-page').dataset.timerInterval);
+    }
+
+    alert('Thanh toán thành công! Bạn đã nâng cấp lên Edukie nâng cao.');
+    showPage('home-page'); // Redirect to home/success page
+}
+
 
 // --- Login Form ---
 const loginForm = document.getElementById('login-form');
@@ -250,10 +367,10 @@ function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
     currentExerciseId = null;
-    showPage('login-page');
+    showPage('login-page'); // Redirects to login
     const chatMessages = document.getElementById('chat-messages');
     if (chatMessages) {
-        chatMessages.innerHTML = `<div class="flex"><div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow"><p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p></div></div>`;
+        chatMessages.innerHTML = `<div class="flex"><div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow"><p>Xin chào! Tôi là Edukie. Vui lòng nhập bài tập (hoặc đính kèm hình ảnh) để nhận gợi ý từng bước.</p></div></div>`;
     }
     resetChatState();
 }
@@ -304,6 +421,11 @@ if (chatForm) {
     chatForm.addEventListener('submit', e => {
         e.preventDefault();
         const message = chatInput.value.trim();
+        if (!authToken) {
+            addMessage("Please log in or register to start a new exercise.", 'ai', 'error');
+            return;
+        }
+
         if (currentExerciseId) {
             if (!message) return;
             handleSubmitAnswer(message);
@@ -433,7 +555,8 @@ function init() {
         authToken = token;
         showPage('home-page');
     } else {
-        showPage('login-page');
+        // Always default to home-page if not logged in, as requested.
+        showPage('home-page'); 
     }
 
     // Logout listeners
@@ -443,6 +566,8 @@ function init() {
     document.getElementById('shop-logout-btn')?.addEventListener('click', handleLogout);
     document.getElementById('contact-logout-btn')?.addEventListener('click', handleLogout);
     document.getElementById('global-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('logout-btn')?.addEventListener('click', handleLogout); // For chat page header
+    document.getElementById('logout-btn-sidebar')?.addEventListener('click', handleLogout); // For chat page sidebar
 
     // Sidebar toggle
     const sidebar = document.getElementById('sidebar');
@@ -477,6 +602,46 @@ function init() {
     });
     closeRoadmapBtn?.addEventListener('click', () => roadmapModal.classList.add('hidden'));
     roadmapForm?.addEventListener('submit', handleRoadmapRequest);
+}
+
+// Placeholder for handleRoadmapRequest (not provided in prompt but referenced)
+async function handleRoadmapRequest(e) {
+    e.preventDefault();
+    const target = document.getElementById('learning-target-input').value;
+    const statusEl = document.getElementById('roadmap-status');
+    const displayEl = document.getElementById('roadmap-display');
+    const generateBtn = document.getElementById('generate-roadmap-btn');
+
+    statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+    statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
+    statusEl.textContent = 'Generating roadmap...';
+    generateBtn.disabled = true;
+
+    // FAKE API CALL DELAY
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    if (target.toLowerCase().includes('error')) {
+         statusEl.classList.replace('bg-yellow-100', 'bg-red-100');
+         statusEl.classList.replace('text-yellow-700', 'text-red-700');
+         statusEl.textContent = 'Error generating roadmap. Please try again.';
+         generateBtn.disabled = false;
+         displayEl.classList.add('hidden');
+         return;
+    }
+
+    statusEl.classList.replace('bg-yellow-100', 'bg-green-100');
+    statusEl.classList.replace('text-yellow-700', 'text-green-700');
+    statusEl.textContent = 'Roadmap generated successfully!';
+    
+    displayEl.innerHTML = `
+        <h4 class="font-semibold text-blue-600">Lộ trình cho: ${target}</h4>
+        <p class="text-sm"><strong>Tuần 1:</strong> Ôn tập cơ bản và các định lý chính.</p>
+        <p class="text-sm"><strong>Tuần 2:</strong> Bài tập ứng dụng và kiểm tra giữa kỳ.</p>
+        <p class="text-sm"><strong>Tuần 3:</strong> Mô hình hóa và dự đoán nâng cao.</p>
+        <p class="text-sm"><strong>Tuần 4:</strong> Tổng hợp và chuẩn bị thi.</p>
+    `;
+    displayEl.classList.remove('hidden');
+    generateBtn.disabled = false;
 }
 
 init();
