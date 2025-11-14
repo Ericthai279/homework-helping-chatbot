@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request # <-- Import Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 import base64
 
 from db.database import get_db
 from models import user as user_model
 from models import exercise as exercise_model 
+from models import interaction as interaction_model # Ensure this is imported for Interaction model
 from schemas import exercise as exercise_schema
 from core.tutor_service import TutorService
 from routers.auth import get_current_user
@@ -16,11 +17,7 @@ router = APIRouter(
 
 @router.post("/", response_model=exercise_schema.ExerciseResponse)
 async def create_exercise(
-    # --- THIS IS THE FIX ---
-    # We no longer use the Pydantic model for the request.
-    # We get the raw Request object.
     request: Request,
-    # ---------------------
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(get_current_user)
 ):
@@ -28,7 +25,6 @@ async def create_exercise(
     Create a new exercise (from text and/or base64 image).
     Returns the first hint.
     """
-    # --- MANUALLY PARSE JSON ---
     try:
         data = await request.json()
     except Exception:
@@ -36,7 +32,6 @@ async def create_exercise(
     
     prompt = data.get("prompt", "")
     base64_image = data.get("base64_image")
-    # -------------------------
 
     if not prompt and not base64_image:
         raise HTTPException(status_code=400, detail="Must provide either text or an image")
@@ -53,6 +48,7 @@ async def create_exercise(
         
         if not prompt and base64_image:
             try:
+                # Use the OCR output from the guidance as the exercise content
                 exercise_content = initial_guidance.split('\n')[0]
             except:
                 exercise_content = "Exercise from image"
@@ -66,7 +62,7 @@ async def create_exercise(
         db.commit()
 
         # 3. Save the first interaction
-        first_interaction = exercise_model.Interaction(
+        first_interaction = interaction_model.Interaction(
             exercise_id=db_exercise.id,
             ai_response=initial_guidance
         )
@@ -84,17 +80,13 @@ async def create_exercise(
 @router.post("/{exercise_id}/answer")
 async def submit_answer(
     exercise_id: int,
-    # --- THIS IS THE FIX (Part 2) ---
-    # We do the same for the answer endpoint.
     request: Request,
-    # --------------------------
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(get_current_user)
 ):
     """
     Submit an answer for an in-progress exercise.
     """
-    # --- MANUALLY PARSE JSON ---
     try:
         data = await request.json()
     except Exception:
@@ -102,8 +94,7 @@ async def submit_answer(
 
     user_answer = data.get("answer")
     if not user_answer:
-         raise HTTPException(status_code=422, detail="Missing 'answer' field")
-    # -------------------------
+        raise HTTPException(status_code=422, detail="Missing 'answer' field")
 
     db_exercise = db.query(exercise_model.Exercise).filter(
         exercise_model.Exercise.id == exercise_id,
@@ -117,19 +108,21 @@ async def submit_answer(
         raise HTTPException(status_code=400, detail="Exercise is already completed")
 
     try:
-        # 1. Call AI to check the answer
-        check_response_text = await TutorService.check_user_answer(
+        # 1. Call AI to check the answer (returns a Pydantic object: CheckAnswerLLM)
+        check_response_obj = await TutorService.check_user_answer(
             exercise_content=db_exercise.content,
-            user_answer=user_answer # Use our manually parsed variable
+            user_answer=user_answer
         )
         
-        # ... (rest of the function is the same) ...
-        is_correct = "correct" in check_response_text.lower() or "great job" in check_response_text.lower()
+        # FIX: Get data directly from the object's structured fields
+        is_correct = check_response_obj.is_correct
+        check_response_text = check_response_obj.explanation # The text explanation
         
-        db_interaction = exercise_model.Interaction(
+        # 2. Save the user's answer and the AI's check
+        db_interaction = interaction_model.Interaction(
             exercise_id=db_exercise.id,
             user_answer=user_answer,
-            ai_response=check_response_text,
+            ai_response=check_response_text, # FIX: Store the text explanation
             is_correct=is_correct
         )
         db.add(db_interaction)
@@ -138,11 +131,14 @@ async def submit_answer(
         if is_correct:
             db_exercise.status = "completed"
             
-            suggested_exercise_text = await TutorService.get_similar_exercise(
+            # 3. If correct, get a similar exercise (returns a Pydantic object: SimilarExerciseLLM)
+            suggested_exercise_obj = await TutorService.get_similar_exercise(
                 exercise_content=db_exercise.content
             )
+            suggested_exercise_text = suggested_exercise_obj.content # FIX: Access the content field
             
-            suggestion_interaction = exercise_model.Interaction(
+            # 4. Save the suggestion as a new interaction
+            suggestion_interaction = interaction_model.Interaction(
                 exercise_id=db_exercise.id,
                 suggested_exercise=suggested_exercise_text
             )
@@ -158,4 +154,5 @@ async def submit_answer(
 
     except Exception as e:
         print(f"Error checking answer: {e}")
+        # Re-raise the exception as an HTTP 500 error for the client
         raise HTTPException(status_code=500, detail=f"Error processing: {str(e)}")
