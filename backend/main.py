@@ -6,7 +6,9 @@ import os # Import os
 
 from core.config import settings
 from db.database import create_tables
-from routers import auth, exercise, roadmap, payments
+from routers import auth, exercise, roadmap
+
+# payments 
 
 # Create all database tables (if they don't exist)
 create_tables()
@@ -24,7 +26,7 @@ app = FastAPI(
 app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(exercise.router, prefix=settings.API_PREFIX)
 app.include_router(roadmap.router, prefix=settings.API_PREFIX)
-app.include_router(payments.router, prefix=settings.API_PREFIX)
+# app.include_router(payments.router, prefix=settings.API_PREFIX)
 
 # --- Frontend Serving ---
 
