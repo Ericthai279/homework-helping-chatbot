@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from datetime import timedelta, datetime, UTC
 
 from db.database import get_db
-from models import user as user_model
+# FIX: Import models directly from their files, not through the __init__.py
+from models.user import User as UserModel
 from schemas import user as user_schema
 from schemas import token as token_schema
 from core.config import settings
@@ -42,14 +43,13 @@ router = APIRouter(
     tags=["auth"]
 )
 
-# --- THIS IS THE UPDATED FUNCTION ---
 @router.post("/register", response_model=user_schema.User)
 def register_user(
     user: user_schema.UserCreate, # <-- This schema now contains all the new fields
     db: Session = Depends(get_db)
 ):
     # Check if email already exists
-    db_user_email = db.query(user_model.User).filter(user_model.User.email == user.email).first()
+    db_user_email = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -57,7 +57,7 @@ def register_user(
         )
     
     # Check if username already exists
-    db_user_username = db.query(user_model.User).filter(user_model.User.username == user.username).first()
+    db_user_username = db.query(UserModel).filter(UserModel.username == user.username).first()
     if db_user_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -67,7 +67,7 @@ def register_user(
     hashed_password = get_password_hash(user.password)
     
     # Create the new user object with all fields from the schema
-    new_user = user_model.User(
+    new_user = UserModel(
         email=user.email,
         hashed_password=hashed_password,
         username=user.username,
@@ -82,13 +82,12 @@ def register_user(
     db.refresh(new_user)
     
     return new_user
-# --- END OF UPDATED FUNCTION ---
 
 
 @router.post("/token", response_model=token_schema.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     # Note: Login still uses email (form_data.username)
-    user = db.query(user_model.User).filter(user_model.User.email == form_data.username).first()
+    user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
     
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -120,7 +119,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
         
-    user = db.query(user_model.User).filter(user_model.User.email == token_data.email).first()
+    user = db.query(UserModel).filter(UserModel.email == token_data.email).first()
     if user is None:
         raise credentials_exception
     return user

@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 import base64
 
 from db.database import get_db
-from models import user as user_model
-from models import exercise as exercise_model 
-from models import interaction as interaction_model # Ensure this is imported for Interaction model
+# FIX: Import models directly from their files, not through the __init__.py
+from models.user import User as UserModel
+from models.exercise import Exercise as ExerciseModel
+from models.exercise import Interaction as InteractionModel 
 from schemas import exercise as exercise_schema
 from core.tutor_service import TutorService
 from routers.auth import get_current_user
@@ -19,7 +20,7 @@ router = APIRouter(
 async def create_exercise(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: user_model.User = Depends(get_current_user)
+    current_user: UserModel = Depends(get_current_user)
 ):
     """
     Create a new exercise (from text and/or base64 image).
@@ -53,7 +54,7 @@ async def create_exercise(
             except:
                 exercise_content = "Exercise from image"
         
-        db_exercise = exercise_model.Exercise(
+        db_exercise = ExerciseModel(
             user_id=current_user.id,
             content=exercise_content,
             image_base64=base64_image
@@ -62,7 +63,7 @@ async def create_exercise(
         db.commit()
 
         # 3. Save the first interaction
-        first_interaction = interaction_model.Interaction(
+        first_interaction = InteractionModel(
             exercise_id=db_exercise.id,
             ai_response=initial_guidance
         )
@@ -82,7 +83,7 @@ async def submit_answer(
     exercise_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: user_model.User = Depends(get_current_user)
+    current_user: UserModel = Depends(get_current_user)
 ):
     """
     Submit an answer for an in-progress exercise.
@@ -96,9 +97,9 @@ async def submit_answer(
     if not user_answer:
         raise HTTPException(status_code=422, detail="Missing 'answer' field")
 
-    db_exercise = db.query(exercise_model.Exercise).filter(
-        exercise_model.Exercise.id == exercise_id,
-        exercise_model.Exercise.user_id == current_user.id
+    db_exercise = db.query(ExerciseModel).filter(
+        ExerciseModel.id == exercise_id,
+        ExerciseModel.user_id == current_user.id
     ).first()
 
     if not db_exercise:
@@ -119,7 +120,7 @@ async def submit_answer(
         check_response_text = check_response_obj.explanation # The text explanation
         
         # 2. Save the user's answer and the AI's check
-        db_interaction = interaction_model.Interaction(
+        db_interaction = InteractionModel(
             exercise_id=db_exercise.id,
             user_answer=user_answer,
             ai_response=check_response_text, # FIX: Store the text explanation
@@ -138,7 +139,7 @@ async def submit_answer(
             suggested_exercise_text = suggested_exercise_obj.content # FIX: Access the content field
             
             # 4. Save the suggestion as a new interaction
-            suggestion_interaction = interaction_model.Interaction(
+            suggestion_interaction = InteractionModel(
                 exercise_id=db_exercise.id,
                 suggested_exercise=suggested_exercise_text
             )
@@ -153,6 +154,6 @@ async def submit_answer(
         }
 
     except Exception as e:
-        print(f"Error checking answer: {e}")
+        print(f"Error processing: {e}")
         # Re-raise the exception as an HTTP 500 error for the client
         raise HTTPException(status_code=500, detail=f"Error processing: {str(e)}")
