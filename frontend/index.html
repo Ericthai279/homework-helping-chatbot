@@ -15,60 +15,269 @@
 
     <!-- 
       ================================================================
-      PAGE 1 & 2: LOGIN & REGISTER (Remain the same)
+      GLOBAL COMPONENTS (Templates)
       ================================================================
     -->
-    <div id="login-page" class="page flex items-center justify-center w-full min-h-screen active">
-        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Welcome Back!</h2>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="login-email" name="username" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+    <template id="global-header-template">
+        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
+                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
+                <div class="flex space-x-10 text-lg font-medium">
+                    <a href="#" onclick="showPage('home-page')" id="nav-home" class="text-gray-600 hover:text-[#0259dd]">TRANG CHỦ</a>
+                    <a href="#" onclick="showPage('about-page')" id="nav-about" class="text-gray-600 hover:text-[#0259dd]">VỀ CHÚNG TÔI</a>
+                    <a href="#" onclick="showPage('service-page')" id="nav-service" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
+                    <a href="#" onclick="showPage('shop-page')" id="nav-shop" class="text-gray-600 hover:text-[#0259dd]">CỬA HÀNG</a>
+                    <a href="#" onclick="showPage('contact-page')" id="nav-contact" class="text-gray-600 hover:text-[#0259dd]">LIÊN HỆ</a>
                 </div>
-                <div class="mb-6">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" name="password" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button id="global-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
+            </nav>
+        </header>
+    </template>
+    
+    <template id="global-footer-template">
+        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
+            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+                <!-- Col 1: Logo & Social -->
+                <div>
+                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
+                    <div class="flex space-x-3 text-gray-600">
+                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition">Log In</button>
+
+                <!-- Col 2: VỀ EDUKIE -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
+                </div>
+
+                <!-- Col 3: Chính sách -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
+                </div>
+
+                <!-- Col 4: Dịch vụ -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
+                </div>
+                
+            </div>
+            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
+        </footer>
+    </template>
+
+
+    <!-- 
+   This is a fantastic new design! You want the Login and Register forms to adopt the full-width, centered card structure shown in your image, complete with the social buttons, divider, and custom footer layout.
+
+I will update your frontend/index.html to reflect this new, single design for both the Login and Register pages. This keeps your application's modularity clean.
+
+Here is the complete code for your updated frontend/index.html file.
+
+1. Fixed File: frontend/index.html (New Login/Register UI)
+I have completely redesigned the content inside the login-page and register-page divs to use your new layout dimensions and styles (translated to Tailwind CSS).
+
+HTML
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edukie AI Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to your CSS file using the /static/ path -->
+    <link rel="stylesheet" href="/static/style.css"> 
+</head>
+<body class="flex flex-col min-h-screen bg-[#fffdf5]">
+
+    <!-- 
+      ================================================================
+      GLOBAL COMPONENTS (Templates)
+      ================================================================
+    -->
+    <template id="global-header-template">
+        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
+                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
+                <div class="flex space-x-10 text-lg font-medium">
+                    <a href="#" onclick="showPage('home-page')" id="nav-home" class="text-gray-600 hover:text-[#0259dd]">TRANG CHỦ</a>
+                    <a href="#" onclick="showPage('about-page')" id="nav-about" class="text-gray-600 hover:text-[#0259dd]">VỀ CHÚNG TÔI</a>
+                    <a href="#" onclick="showPage('service-page')" id="nav-service" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
+                    <a href="#" onclick="showPage('shop-page')" id="nav-shop" class="text-gray-600 hover:text-[#0259dd]">CỬA HÀNG</a>
+                    <a href="#" onclick="showPage('contact-page')" id="nav-contact" class="text-gray-600 hover:text-[#0259dd]">LIÊN HỆ</a>
+                </div>
+                <button id="global-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
+            </nav>
+        </header>
+    </template>
+    
+    <template id="global-footer-template">
+        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
+            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+                <!-- Col 1: Logo & Social -->
+                <div>
+                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
+                    <div class="flex space-x-3 text-gray-600">
+                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
+                    </div>
+                </div>
+
+                <!-- Col 2: VỀ EDUKIE -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
+                </div>
+
+                <!-- Col 3: Chính sách -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
+                </div>
+
+                <!-- Col 4: Dịch vụ -->
+                <div class="space-y-2">
+                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
+                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
+                </div>
+                
+            </div>
+            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
+        </footer>
+    </template>
+
+
+    <!-- 
+      ================================================================
+      PAGE 1: LOGIN (FIXED UI)
+      ================================================================
+    -->
+    <div id="login-page" class="page flex items-center justify-center w-full min-h-screen">
+        <!-- Content Container (Max width 578px as per design) -->
+        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl mx-auto my-12">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Đăng nhập tài khoản</h2>
+            
+            <div class="flex flex-col space-y-4 mb-8">
+                <!-- Social Login 1: Facebook -->
+                <button class="flex items-center justify-center space-x-4 w-full py-4 rounded-3xl border border-gray-400 bg-white shadow-sm text-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                    <!-- Placeholder for Facebook Logo -->
+                    <span class="text-xl">📘</span>
+                    <span>Đăng nhập bằng Facebook</span>
+                </button>
+                <!-- Social Login 2: Google -->
+                <button class="flex items-center justify-center space-x-4 w-full py-4 rounded-3xl border border-gray-400 bg-white shadow-sm text-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                    <!-- Placeholder for Google Logo -->
+                    <span class="text-xl">G</span>
+                    <span>Đăng nhập bằng Google</span>
+                </button>
+            </div>
+            
+            <!-- Divider -->
+            <div class="flex items-center my-8">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-500 font-medium text-lg">HOẶC</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <h3 class="text-2xl font-semibold text-center text-gray-800 mb-6">Đăng nhập bằng email</h3>
+
+            <form id="login-form" class="space-y-6">
+                <!-- Email/Username -->
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="login-email" name="username" placeholder="Nhập địa chỉ email của bạn" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
+                </div>
+                
+                <!-- Password -->
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
+                    <input type="password" id="login-password" name="password" placeholder="Nhập mật khẩu của bạn" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
+                    <p class="text-right text-blue-600 text-sm mt-1">Quên mật khẩu?</p>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-[#0259dd] text-white py-4 rounded-3xl font-semibold text-xl shadow-lg hover:bg-blue-700 transition">Đăng nhập</button>
                 <p class="text-center text-sm text-gray-600 mt-4 message"></p>
             </form>
-            <p class="text-center text-sm text-gray-600 mt-6">
-                Don't have an account? 
-                <a href="#" onclick="showPage('register-page')" class="font-medium text-blue-600 hover:underline">Register now</a>
+
+            <!-- Link to Register -->
+            <p class="text-center text-lg text-gray-600 mt-8">
+                Chưa có tài khoản? 
+                <a href="#" onclick="showPage('register-page')" class="font-medium text-gray-800 hover:underline">Đăng ký ngay</a>
             </p>
         </div>
     </div>
 
+
+    <!-- 
+      ================================================================
+      PAGE 2: REGISTER (FIXED UI)
+      ================================================================
+    -->
     <div id="register-page" class="page flex items-center justify-center w-full min-h-screen">
-        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl my-12">
+        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl mx-auto my-12">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">BẮT ĐẦU CUỘC HÀNH TRÌNH CỦA BẠN</h2>
             <p class="text-center text-gray-600 mb-6">Đăng ký bằng tài khoản email</p>
             
-            <form id="register-form" class="space-y-4">
+            <div class="flex flex-col space-y-4 mb-8">
+                <!-- Social Login 1: Facebook -->
+                <button class="flex items-center justify-center space-x-4 w-full py-4 rounded-3xl border border-gray-400 bg-white shadow-sm text-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                    <span class="text-xl">📘</span>
+                    <span>Đăng nhập bằng Facebook</span>
+                </button>
+                <!-- Social Login 2: Google -->
+                <button class="flex items-center justify-center space-x-4 w-full py-4 rounded-3xl border border-gray-400 bg-white shadow-sm text-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                    <span class="text-xl">G</span>
+                    <span>Đăng nhập bằng Google</span>
+                </button>
+            </div>
+            
+            <!-- Divider -->
+            <div class="flex items-center my-8">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-500 font-medium text-lg">HOẶC</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <form id="register-form" class="space-y-6">
                 
                 <!-- Tên tài khoản -->
                 <div>
-                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">Tên tài khoản</label>
-                    <input type="text" id="register-username" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-2">Tên tài khoản</label>
+                    <input type="text" id="register-username" placeholder="Nhập tên tài khoản của bạn" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                 </div>
 
                 <!-- Email -->
                 <div>
-                    <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="register-email" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="register-email" placeholder="Nhập địa chỉ email của bạn" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                 </div>
 
                 <!-- Mật khẩu -->
                 <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-                    <input type="password" id="register-password" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
+                    <input type="password" id="register-password" placeholder="Nhập mật khẩu của bạn" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" required>
                     <p class="text-xs text-blue-600 mt-1">Nên sử dụng tối thiểu 8 kí tự gồm chữ và số và kí tự đặc biệt</p>
                 </div>
 
+                <div class="h-px bg-gray-200 my-4"></div>
+
                 <!-- Giới tính -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính của bạn?</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Giới tính của bạn?</label>
                     <div class="flex items-center space-x-6">
                         <label class="flex items-center">
                             <input type="radio" name="gender" value="male" class="text-blue-600 focus:ring-blue-500">
@@ -87,15 +296,15 @@
 
                 <!-- Ngày sinh -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh của bạn?</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ngày sinh của bạn?</label>
                     <div class="grid grid-cols-3 gap-4">
-                        <select id="register-dob-day" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="register-dob-day" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                             <option value="">Ngày</option>
                         </select>
-                        <select id="register-dob-month" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="register-dob-month" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                             <option value="">Tháng</option>
                         </select>
-                        <select id="register-dob-year" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="register-dob-year" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
                             <option value="">Năm</option>
                         </select>
                     </div>
@@ -103,80 +312,60 @@
 
                 <!-- Ngành học -->
                 <div>
-                    <label for="register-major" class="block text-sm font-medium text-gray-700 mb-1">Ngành học của bạn?</label>
-                    <select id="register-major" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Chọn ngành học</option>
-                        <option value="business">Kinh doanh quốc tế</option>
-                        <option value="it">Công nghệ thông tin</option>
-                        <option value="marketing">Marketing</option>
-                        <option value="design">Thiết kế đồ hoạ</option>
-                    </select>
-                </div>
-
-                <!-- Trường học -->
-                <div>
-                    <label for="register-school" class="block text-sm font-medium text-gray-700 mb-1">Trường học của bạn?</label>
-                    <input type="text" id="register-school" placeholder="Nhập trường học của bạn tại đây" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Checkboxes -->
-                <div class="space-y-3">
-                    <label class="flex items-start">
-                        <input type="checkbox" id="register-terms" class="mt-1 text-blue-600 focus:ring-blue-500 rounded">
-                        <span class="ml-2 text-sm text-gray-700">Tôi đồng ý với các <a href="#" onclick="return false;" class="text-blue-600 hover:underline">Điều khoản sử dụng</a> và <a href="#" onclick="return false;" class="text-blue-600 hover:underline">Chính sách bảo mật</a> của Edukie</span>
-                    </label>
-                    <label class="flex items-start">
-                        <input type="checkbox" id="register-data-sharing" class="mt-1 text-blue-600 focus:ring-blue-500 rounded">
-                        <span class="ml-2 text-sm text-gray-700">Chia sẻ dữ liệu đăng nhập của chúng tôi với các nhà cung cấp nội dung của chúng tôi với mục đích tiếp thị</span>
-                    </label>
-                </div>
-
-                <!-- reCAPTCHA Placeholder -->
-                <div class="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="register-recaptcha" class="w-6 h-6 text-blue-600 focus:ring-blue-500 rounded">
-                        <label for="register-recaptcha" class="ml-4 text-sm font-medium text-gray-800">I'm not a robot</label>
+                    <label for="register-major" class="block text-sm font-medium text-gray-700 mb-2">Ngành học của bạn?</label>
+                    <select id="register-major" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                            <option value="">Chọn ngành học</option>
+                            <option value="business">Kinh doanh quốc tế</option>
+                            <option value="it">Công nghệ thông tin</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="design">Thiết kế đồ hoạ</option>
+                        </select>
                     </div>
-                    <div class="text-xs text-gray-500">
-                        [reCAPTCHA]
-                    </div>
-                </div>
 
-                <!-- Submit Button -->
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition">Đăng ký</button>
-                <p class="text-center text-sm text-gray-600 mt-4 message"></p>
-            
-            </form>
-            
-            <!-- Link to Login -->
-            <p class="text-center text-sm text-gray-600 mt-6">
-                Bạn đã có tài khoản? 
-                <a href="#" onclick="showPage('login-page')" class="font-medium text-blue-600 hover:underline">Đăng nhập</a>
-            </p>
+                    <!-- Trường học -->
+                    <div>
+                        <label for="register-school" class="block text-sm font-medium text-gray-700 mb-2">Trường học của bạn?</label>
+                        <input type="text" id="register-school" placeholder="Nhập trường học của bạn tại đây" class="w-full px-4 py-3 bg-white rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    </div>
+
+                    <!-- Checkboxes -->
+                    <div class="space-y-3 pt-4">
+                        <label class="flex items-start">
+                            <input type="checkbox" id="register-terms" class="mt-1 text-blue-600 focus:ring-blue-500 rounded">
+                            <span class="ml-2 text-sm text-gray-700">Tôi đồng ý với các <a href="#" onclick="return false;" class="text-blue-600 hover:underline">Điều khoản sử dụng</a> và <a href="#" onclick="return false;" class="text-blue-600 hover:underline">Chính sách bảo mật</a> của Edukie</span>
+                        </label>
+                    </div>
+
+                    <!-- reCAPTCHA Placeholder (Simplified) -->
+                    <div class="w-full p-4 border border-gray-400 rounded-xl bg-white shadow-sm flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="register-recaptcha" class="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded">
+                            <label for="register-recaptcha" class="ml-4 text-base font-medium text-gray-800">I'm not a robot</label>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            [reCAPTCHA]
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-3xl font-semibold text-xl shadow-lg hover:bg-blue-700 transition">Đăng ký</button>
+                    <p class="text-center text-sm text-gray-600 mt-4 message"></p>
+                
+                </form>
+                
+                <!-- Link to Login -->
+                <p class="text-center text-lg text-gray-600 mt-8">
+                    Bạn đã có tài khoản? 
+                    <a href="#" onclick="showPage('login-page')" class="font-medium text-gray-800 hover:underline">Đăng nhập</a>
+                </p>
+            </div>
         </div>
-    </div>
-
     <!-- 
       ================================================================
       PAGE 3: HOME PAGE
       ================================================================
     -->
     <div id="home-page" class="page w-full">
-        <!-- Header (Navigation Bar) -->
-        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
-                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
-                <div class="flex space-x-10 text-lg font-medium">
-                    <a href="#" onclick="showPage('home-page')" class="text-[#0259dd]">TRANG CHỦ</a>
-                    <a href="#" onclick="showPage('about-page')" class="text-gray-600 hover:text-[#0259dd]">VỀ CHÚNG TÔI</a>
-                    <a href="#" onclick="showPage('service-page')" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
-                    <a href="#" onclick="showPage('shop-page')" class="text-gray-600 hover:text-[#0259dd]">CỬA HÀNG</a>
-                    <a href="#" onclick="showPage('contact-page')" class="text-gray-600 hover:text-[#0259dd]">LIÊN HỆ</a>
-                </div>
-                <button id="nav-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
-            </nav>
-        </header>
-        <!-- Home Content (Reused from previous step) -->
         <main class="max-w-7xl mx-auto py-12 px-4 space-y-24">
             <!-- Hero Section -->
             <section class="flex flex-col lg:flex-row items-center justify-between gap-12">
@@ -187,7 +376,7 @@
                     <p class="text-xl text-gray-600 leading-relaxed">
                         Edukie là nền tảng học tập thông minh sử dụng trí tuệ nhân tạo (AI) để hướng dẫn sinh viên, học sinh tự học chủ động và hiệu quả.
                     </p>
-                    <button onclick="showPage('chat-page')" class="bg-[#0259dd] text-white px-8 py-4 text-xl font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition">
+                    <button onclick="checkAuthAndNavigate('chat')" class="bg-[#0259dd] text-white px-8 py-4 text-xl font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition">
                         SỬ DỤNG MIỄN PHÍ NGAY HÔM NAY
                     </button>
                 </div>
@@ -304,74 +493,22 @@
                     <button class="bg-white text-[#0259dd] px-8 py-3 rounded-lg text-xl font-semibold hover:bg-gray-100 transition">
                         Tham vấn với chuyên gia Edukie ngay hôm nay
                     </button>
-                    <button onclick="showPage('chat-page')" class="bg-transparent border border-white text-white px-8 py-3 rounded-lg text-xl font-semibold hover:bg-white/10 transition">
+                    <button onclick="checkAuthAndNavigate('chat')" class="bg-transparent border border-white text-white px-8 py-3 rounded-lg text-xl font-semibold hover:bg-white/10 transition">
                         Đăng ký ngay
                     </button>
                 </div>
             </section>
         </main>
-        
-        <!-- Footer -->
-        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
-                
-                <!-- Col 1: Logo & Social -->
-                <div>
-                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
-                    <div class="flex space-x-3 text-gray-600">
-                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
-                    </div>
-                </div>
-
-                <!-- Col 2: VỀ EDUKIE -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
-                </div>
-
-                <!-- Col 3: Chính sách -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
-                </div>
-
-                <!-- Col 4: Dịch vụ -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
-                </div>
-                
-            </div>
-            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
-        </footer>
     </div>
 
 
     <!-- 
       ================================================================
-      PAGE 4: ABOUT US PAGE
+      PAGE 4: ABOUT US PAGE (FIXED)
       ================================================================
     -->
     <div id="about-page" class="page w-full">
-        <!-- Header (Re-using the standard header for consistency) -->
-        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
-                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
-                <div class="flex space-x-10 text-lg font-medium">
-                    <a href="#" onclick="showPage('home-page')" class="text-gray-600 hover:text-[#0259dd]">TRANG CHỦ</a>
-                    <a href="#" onclick="showPage('about-page')" class="text-[#0259dd]">VỀ CHÚNG TÔI</a>
-                    <a href="#" onclick="showPage('service-page')" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
-                    <a href="#" onclick="showPage('shop-page')" class="text-gray-600 hover:text-[#0259dd]">CỬA HÀNG</a>
-                    <a href="#" onclick="showPage('contact-page')" class="text-gray-600 hover:text-[#0259dd]">LIÊN HỆ</a>
-                </div>
-                <button id="about-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
-            </nav>
-        </header>
-
+        <!-- Header, Footer, and Main Content Wrapper will be dynamically inserted -->
         <main class="max-w-6xl mx-auto py-12 px-4 space-y-16">
             
             <!-- 1. Page Title -->
@@ -434,44 +571,6 @@
             </section>
 
         </main>
-        
-        <!-- Footer (Re-using the main footer for consistency) -->
-        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
-                
-                <!-- Col 1: Logo & Social -->
-                <div>
-                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
-                    <div class="flex space-x-3 text-gray-600">
-                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
-                    </div>
-                </div>
-
-                <!-- Col 2: VỀ EDUKIE -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
-                </div>
-
-                <!-- Col 3: Chính sách -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
-                </div>
-
-                <!-- Col 4: Dịch vụ -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
-                </div>
-                
-            </div>
-            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
-        </footer>
     </div>
 
 
@@ -481,21 +580,7 @@
       ================================================================
     -->
     <div id="service-page" class="page w-full min-h-screen">
-        <!-- Header -->
-        <header class="bg-[#0259dd] text-white py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
-                <div class="text-2xl font-bold text-white">EDUKIE</div>
-                <div class="flex space-x-10 text-lg font-medium">
-                    <a href="#" onclick="showPage('home-page')" class="text-white/80 hover:text-white">TRANG CHỦ</a>
-                    <a href="#" onclick="showPage('about-page')" class="text-white/80 hover:text-white">VỀ CHÚNG TÔI</a>
-                    <a href="#" onclick="showPage('service-page')" class="text-white">DỊCH VỤ</a>
-                    <a href="#" onclick="showPage('shop-page')" class="text-white/80 hover:text-white">CỬA HÀNG</a>
-                    <a href="#" onclick="showPage('contact-page')" class="text-white/80 hover:text-white">LIÊN HỆ</a>
-                </div>
-                <button id="service-logout-btn" class="bg-white text-[#0259dd] px-6 py-2 rounded-lg text-lg font-semibold hover:bg-gray-100 transition">ĐĂNG XUẤT</button>
-            </nav>
-        </header>
-
+        <!-- Header, Footer, and Main Content Wrapper will be dynamically inserted -->
         <main class="max-w-7xl mx-auto py-12 px-4 space-y-16">
             
             <!-- 1. Hero/Title Section -->
@@ -515,8 +600,8 @@
                     <h2 class="text-3xl font-bold text-[#0259dd]">CƠ BẢN</h2>
                     <p class="text-gray-600 text-lg">Phù hợp cho học sinh, sinh viên muốn làm quen và tự học chủ động.</p>
                     <div class="flex space-x-4">
-                        <button onclick="showPage('chat-page')" class="bg-[#0259dd] text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">LÀM BÀI TẬP</button>
-                        <button class="bg-gray-200 text-[#0259dd] px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">ĐĂNG KÝ NGAY</button>
+                        <button onclick="handleServiceAction('chat')" class="bg-[#0259dd] text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">LÀM BÀI TẬP</button>
+                        <button onclick="showPage('register-page')" class="bg-gray-200 text-[#0259dd] px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">ĐĂNG KÝ NGAY</button>
                     </div>
                     <div class="h-64 bg-gray-100 rounded-lg mt-6 flex items-center justify-center text-gray-500">
                         [Screenshot Placeholder: Chat Interface]
@@ -528,8 +613,8 @@
                     <h2 class="text-3xl font-bold text-[#0259dd]">NÂNG CAO</h2>
                     <p class="text-gray-600 text-lg">Dành cho sinh viên muốn tối ưu hóa quá trình học tập và có kế hoạch học rõ ràng, hiệu quả tối đa.</p>
                     <div class="flex space-x-4">
-                        <button onclick="showPage('chat-page')" class="bg-[#0259dd] text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">LÀM BÀI TẬP</button>
-                        <button class="bg-gray-200 text-[#0259dd] px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">ĐĂNG KÝ NGAY</button>
+                        <button onclick="handleServiceAction('chat')" class="bg-[#0259dd] text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">LÀM BÀI TẬP</button>
+                        <button onclick="showPage('register-page')" class="bg-gray-200 text-[#0259dd] px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">ĐĂNG KÝ NGAY</button>
                     </div>
                     <div class="h-64 bg-gray-100 rounded-lg mt-6 flex items-center justify-center text-gray-500">
                         [Screenshot Placeholder: Roadmap/Advanced Features]
@@ -537,60 +622,99 @@
                 </div>
             </section>
 
-            <!-- 3. CÁC GÓI SỬ DỤNG (Pricing Cards - Horizontal Scroll) -->
-            <section class="space-y-8">
-                <h2 class="text-4xl font-bold text-gray-800 text-center">CÁC GÓI SỬ DỤNG</h2>
-                
-                <div class="flex overflow-x-scroll pb-6 space-x-6 scrollbar-hide">
+            
 
-                    <!-- Plan 1: Miễn Phí (Starter Plan) -->
-                    <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-xl border border-gray-300 space-y-4">
-                        <h3 class="text-2xl font-bold text-gray-800">BẢN</h3>
-                        <p class="text-sm text-gray-500">Gói dùng thử, giới hạn tính năng</p>
-                        <p class="text-4xl font-bold text-gray-800">0đ <span class="text-xl font-normal text-gray-500">/ tháng</span></p>
-                        <div class="h-px bg-gray-300 my-4"></div>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">5 lượt hỏi/ngày</span></li>
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">1GB bộ nhớ đệm</span></li>
-                            <li class="flex items-center space-x-2">❌<span class="text-sm">Không tạo roadmap</span></li>
-                        </ul>
-                        <button class="w-full bg-gray-200 text-gray-800 py-3 rounded-full font-semibold mt-4">ĐÃ CHỌN</button>
-                    </div>
-                    
-                    <!-- Plan 2: HỌC CHỦ ĐỘNG (Pro Plan) -->
-                    <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-2xl border-4 border-[#0259dd] space-y-4 relative">
-                        <div class="absolute top-0 left-0 w-full bg-[#0259dd] text-center text-white text-sm font-bold py-1 rounded-t-xl">
-                            BEST SELLER
-                        </div>
-                        <h3 class="text-2xl font-bold text-[#0259dd] pt-4">HỌC CHỦ ĐỘNG</h3>
-                        <p class="text-sm text-gray-500">Gói nâng cao, toàn diện tính năng</p>
-                        <p class="text-4xl font-bold text-[#0259dd]">69k <span class="text-xl font-normal text-gray-500">/ tháng</span></p>
-                        <div class="h-px bg-gray-300 my-4"></div>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Không giới hạn hỏi đáp</span></li>
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Không giới hạn bộ nhớ đệm</span></li>
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Tạo roadmap học tập cá nhân</span></li>
-                        </ul>
-                        <button class="w-full bg-[#0259dd] text-white py-3 rounded-full font-semibold mt-4 hover:bg-blue-700 transition">CHỌN GÓI</button>
-                    </div>
+<!-- 3. CÁC GÓI SỬ DỤNG (Pricing Cards - Horizontal Scroll) -->
+<section class="space-y-8">
+    <h2 class="text-4xl font-bold text-gray-800 text-center">CÁC GÓI SỬ DỤNG</h2>
+    
+    <div class="flex overflow-x-scroll pb-6 space-x-6 scrollbar-hide">
 
-                    <!-- Plan 3: HỌC TỐI ĐA (Enterprise Plan) -->
-                    <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-lg border border-gray-300 space-y-4">
-                        <h3 class="text-2xl font-bold text-gray-800">HỌC TỐI ĐA</h3>
-                        <p class="text-sm text-gray-500">Dành cho tổ chức, trường học</p>
-                        <p class="text-4xl font-bold text-gray-800">Liên hệ</p>
-                        <div class="h-px bg-gray-300 my-4"></div>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Tất cả tính năng của gói HỌC CHỦ ĐỘNG</span></li>
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Quản lý tài khoản theo nhóm</span></li>
-                            <li class="flex items-center space-x-2">✅<span class="text-sm">Hỗ trợ chuyên biệt 24/7</span></li>
-                        </ul>
-                        <button class="w-full bg-gray-200 text-gray-800 py-3 rounded-full font-semibold mt-4">LIÊN HỆ</button>
-                    </div>
-                </div>
-            </section>
+        <!-- Card 1: CƠ BẢN (Free Trial) -->
+        <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-xl border-2 border-[#0259dd] space-y-4">
+            <h3 class="text-2xl font-bold text-[#0259dd]">CƠ BẢN</h3>
+            <p class="text-sm text-gray-500">Trải nghiệm tất cả các tính năng Edukie</p>
+            <p class="text-4xl font-bold text-[#0259dd] mt-4">MIỄN PHÍ</p>
+            <div class="h-px bg-gray-300 my-4"></div>
+            <ul class="space-y-3 text-gray-700 text-base">
+                <li class="flex items-center space-x-2 text-blue-600 font-semibold">AI hướng dẫn cơ bản</li>
+                <li class="flex items-center space-x-2 text-blue-600 font-semibold">Gợi ý bài tập tương tự</li>
+                <li class="flex items-center space-x-2 text-blue-600 font-semibold">Lộ trình học cá nhân hóa</li>
+                <li class="flex items-center space-x-2 text-blue-600 font-semibold">Chấm điểm bài tập tự động</li>
+                <li class="flex items-center space-x-2 text-blue-600 font-semibold">AI hướng dẫn, đề xuất tài liệu nâng cao</li>
+            </ul>
+            <button class="w-full bg-gray-800 text-white py-3 rounded-full font-semibold mt-4 hover:bg-gray-600 transition">Trải nghiệm miễn phí trọn đời</button>
+        </div>
+        
+        <!-- Card 2: HỌC GAME (69K) - FIX: Added onclick event -->
+        <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-xl border-2 border-[#5497ff] space-y-4 relative bg-[#5497ff]/10">
+            <div class="absolute top-0 left-0 w-full bg-[#5497ff] text-center text-white text-sm font-bold py-1 rounded-t-xl">
+                ĐỀ XUẤT CỦA EDUKIE
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 pt-4">HỌC GAME</h3>
+            <p class="text-sm text-gray-500">Trải nghiệm sân voucher vừa học vừa chơi</p>
+            <p class="text-4xl font-bold text-gray-800">69.000 VNĐ <span class="text-xl font-normal text-gray-500">/tháng</span></p>
+            <div class="h-px bg-gray-300 my-4"></div>
+            <ul class="space-y-3 text-gray-700 text-base">
+                <li class="flex items-center space-x-2">✅<span class="text-sm">AI hướng dẫn không giới hạn</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Gợi ý bài tập tương tự</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Lộ trình học cá nhân hóa</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Chấm điểm bài tập tự động</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Đề xuất tài liệu nâng cao</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Tích lũy voucher hiểm cao hơn</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Nhiều lượt xác thực chơi game hơn</span>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Vừa học vừa chơi game mọi lúc</span></li>
+            </ul>
+            <!-- FIX: Added onclick event -->
+            <button onclick="showPage('premium-offer-page')" class="w-full bg-[#0259dd] text-white py-3 rounded-full font-semibold mt-4 hover:bg-blue-700 transition">Trải nghiệm miễn phí trong 7 ngày</button>
+        </div>
 
-            <!-- 4. SO SÁNH CÁC TÍNH NĂNG (Feature Comparison Table) -->
+        <!-- Card 3: HỌC IDOL (159K) - FIX: Added onclick event -->
+        <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-xl border-2 border-[#5497ff] space-y-4 relative bg-[#5497ff]/10">
+            <div class="absolute top-0 left-0 w-full bg-[#5497ff] text-center text-white text-sm font-bold py-1 rounded-t-xl">
+                ĐỀ XUẤT CỦA EDUKIE
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 pt-4">HỌC IDOL</h3>
+            <p class="text-sm text-gray-500">Trải nghiệm việc học cùng người nổi tiếng</p>
+            <p class="text-4xl font-bold text-gray-800">159.000 VNĐ <span class="text-xl font-normal text-gray-500">/tháng</span></p>
+            <div class="h-px bg-gray-300 my-4"></div>
+            <ul class="space-y-3 text-gray-700 text-base">
+                <li class="flex items-center space-x-2">✅<span class="text-sm">AI hướng dẫn không giới hạn</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Lộ trình học cá nhân hóa</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Chấm điểm bài tập tự động</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">AI hướng dẫn, đề xuất tài liệu nâng cao</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Dùng giọng người nổi tiếng làm tutor</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Nhận nhân vật game hình người nổi tiếng</span></li>
+            </ul>
+            <!-- FIX: Added onclick event -->
+            <button onclick="showPage('premium-offer-page')" class="w-full bg-[#0259dd] text-white py-3 rounded-full font-semibold mt-4 hover:bg-blue-700 transition">Trải nghiệm miễn phí trong 7 ngày</button>
+        </div>
+
+        <!-- Card 4: CHUYÊN GIA (199K) - FIX: Added onclick event -->
+        <div class="flex-shrink-0 w-80 p-6 bg-white rounded-xl shadow-xl border-2 border-[#ff9184] space-y-4 relative bg-[#ff9184]/10">
+            <div class="absolute top-0 left-0 w-full bg-[#ff9184] text-center text-white text-sm font-bold py-1 rounded-t-xl">
+                ĐỀ XUẤT CỦA EDUKIE
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 pt-4">CHUYÊN GIA</h3>
+            <p class="text-sm text-gray-500">Trải nghiệm việc học cùng chuyên gia</p>
+            <p class="text-4xl font-bold text-gray-800">199.000 VNĐ <span class="text-xl font-normal text-gray-500">/tháng</span></p>
+            <div class="h-px bg-gray-300 my-4"></div>
+            <ul class="space-y-3 text-gray-700 text-base">
+                <li class="flex items-center space-x-2">✅<span class="text-sm">AI hướng dẫn không giới hạn</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Lộ trình học cá nhân hóa</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Chấm điểm bài tập tự động</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">AI hướng dẫn, đề xuất tài liệu nâng cao</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Truy cập khóa học của giảng viên đại học</span></li>
+                <li class="flex items-center space-x-2">✅<span class="text-sm">Kết nối trực tiếp với giảng viên đại học</span></li>
+            </ul>
+            <!-- FIX: Added onclick event -->
+            <button onclick="showPage('premium-offer-page')" class="w-full bg-[#0259dd] text-white py-3 rounded-full font-semibold mt-4 hover:bg-blue-700 transition">Trải nghiệm miễn phí trong 7 ngày</button>
+        </div>
+
+    </div>
+</section>
+
+            <!-- 4. SO SÁNH CÁC TÍNH NĂNG (Feature Comparison Table - Remains the same) -->
             <section class="pt-8">
                 <h2 class="text-4xl font-bold text-gray-800 text-center mb-12">SO SÁNH CÁC TÍNH NĂNG</h2>
                 <div class="overflow-x-auto border border-gray-300 rounded-xl">
@@ -638,68 +762,16 @@
                 </div>
             </section>
         </main>
-        
-        <!-- Footer (Re-using the main footer for consistency) -->
-        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
-                
-                <!-- Col 1: Logo & Social -->
-                <div>
-                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
-                    <div class="flex space-x-3 text-gray-600">
-                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
-                    </div>
-                </div>
-
-                <!-- Col 2: VỀ EDUKIE -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
-                </div>
-
-                <!-- Col 3: Chính sách -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
-                </div>
-
-                <!-- Col 4: Dịch vụ -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
-                </div>
-                
-            </div>
-            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
-        </footer>
     </div>
 
 
     <!-- 
       ================================================================
-      PAGE 6: SHOP PAGE (NEW)
+      PAGE 6: SHOP PAGE
       ================================================================
     -->
     <div id="shop-page" class="page w-full min-h-screen">
-        <!-- Header -->
-        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
-                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
-                <div class="flex space-x-10 text-lg font-medium">
-                    <a href="#" onclick="showPage('home-page')" class="text-gray-600 hover:text-[#0259dd]">TRANG CHỦ</a>
-                    <a href="#" onclick="showPage('about-page')" class="text-gray-600 hover:text-[#0259dd]">VỀ CHÚNG TÔI</a>
-                    <a href="#" onclick="showPage('service-page')" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
-                    <a href="#" onclick="showPage('shop-page')" class="text-[#0259dd]">CỬA HÀNG</a>
-                    <a href="#" onclick="showPage('contact-page')" class="text-gray-600 hover:text-[#0259dd]">LIÊN HỆ</a>
-                </div>
-                <button id="shop-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
-            </nav>
-        </header>
-
+        <!-- Header, Footer, and Main Content Wrapper will be dynamically inserted -->
         <main class="max-w-7xl mx-auto py-12 px-4 space-y-16">
             
             <!-- 1. Page Title -->
@@ -781,68 +853,16 @@
             </section>
 
         </main>
-        
-        <!-- Footer (Re-using the main footer for consistency) -->
-        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
-                
-                <!-- Col 1: Logo & Social -->
-                <div>
-                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
-                    <div class="flex space-x-3 text-gray-600">
-                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
-                    </div>
-                </div>
-
-                <!-- Col 2: VỀ EDUKIE -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
-                </div>
-
-                <!-- Col 3: Chính sách -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
-                </div>
-
-                <!-- Col 4: Dịch vụ -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
-                </div>
-                
-            </div>
-            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
-        </footer>
     </div>
 
 
     <!-- 
       ================================================================
-      PAGE 7: CONTACT PAGE (NEW)
+      PAGE 7: CONTACT PAGE
       ================================================================
     -->
     <div id="contact-page" class="page w-full min-h-screen">
-        <!-- Header -->
-        <header class="bg-[#fffdf5] py-8 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-            <nav class="max-w-7xl mx-auto flex justify-between items-center px-4">
-                <div class="text-2xl font-bold text-[#0259dd]">EDUKIE</div>
-                <div class="flex space-x-10 text-lg font-medium">
-                    <a href="#" onclick="showPage('home-page')" class="text-gray-600 hover:text-[#0259dd]">TRANG CHỦ</a>
-                    <a href="#" onclick="showPage('about-page')" class="text-gray-600 hover:text-[#0259dd]">VỀ CHÚNG TÔI</a>
-                    <a href="#" onclick="showPage('service-page')" class="text-gray-600 hover:text-[#0259dd]">DỊCH VỤ</a>
-                    <a href="#" onclick="showPage('shop-page')" class="text-gray-600 hover:text-[#0259dd]">CỬA HÀNG</a>
-                    <a href="#" onclick="showPage('contact-page')" class="text-[#0259dd]">LIÊN HỆ</a>
-                </div>
-                <button id="contact-logout-btn" class="bg-[#0259dd] text-white px-6 py-2 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">ĐĂNG XUẤT</button>
-            </nav>
-        </header>
-
+        <!-- Header, Footer, and Main Content Wrapper will be dynamically inserted -->
         <main class="max-w-7xl mx-auto py-12 px-4 space-y-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
             
             <!-- 1. Left Column: Contact Form -->
@@ -893,61 +913,348 @@
             </section>
 
         </main>
-        
-        <!-- Footer (Re-using the main footer for consistency) -->
-        <footer class="bg-[#fffdf5] border-t border-gray-200 mt-16 py-10">
-            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
-                
-                <!-- Col 1: Logo & Social -->
-                <div>
-                    <h3 class="text-xl font-bold text-[#0259dd] mb-3">EDUKIE</h3>
-                    <div class="flex space-x-3 text-gray-600">
-                        <span>F</span> <span>in</span> <span>T</span> <span>Yt</span> <span>Ig</span>
-                    </div>
-                </div>
-
-                <!-- Col 2: VỀ EDUKIE -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">VỀ EDUKIE</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giới thiệu về chúng tôi</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Đối tác</a>
-                </div>
-
-                <!-- Col 3: Chính sách -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">CHÍNH SÁCH</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Pháp lý</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Điều khoản sử dụng</a>
-                </div>
-
-                <!-- Col 4: Dịch vụ -->
-                <div class="space-y-2">
-                    <p class="font-bold text-gray-800">DỊCH VỤ</p>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Giá cả</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho sinh viên</a>
-                    <a href="#" class="block text-gray-600 hover:text-[#0259dd]">Dành cho giảng viên</a>
-                </div>
-                
-            </div>
-            <p class="text-center text-gray-500 mt-8 text-sm">© 2025 Edukie. All rights reserved</p>
-        </footer>
     </div>
 
 
-    <!-- 
+<!-- 
+      ================================================================
+      PAGE 8: PREMIUM OFFER PAGE
+      ================================================================
+    -->
+    <div id="premium-offer-page" class="page w-full h-screen flex items-center justify-center">
+        <div class="flex max-w-4xl mx-auto bg-gray-50 rounded-2xl shadow-2xl overflow-hidden min-h-[40rem]">
+            
+            <!-- Left Side: Offer Details -->
+            <div class="w-1/2 p-12 space-y-8 bg-white">
+                <button onclick="showPage('service-page')" class="text-[#0259dd] font-semibold flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Dùng thử Edukie nâng cao miễn phí</span>
+                </button>
+                
+                <div class="space-y-4 pt-8">
+                    <div class="flex items-center space-x-3 text-lg">
+                        <span class="text-green-600 text-2xl">✔</span>
+                        <span>7 ngày dùng thử miễn phí, hủy bất cứ lúc nào</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-lg">
+                        <span class="text-green-600 text-2xl">✔</span>
+                        <span>Edukie sẽ nhắc bạn trước khi hết hạn dùng thử</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-8">
+                    <p class="text-xl font-semibold text-gray-800">Thanh toán Edukie nâng cao</p>
+                    <p class="text-3xl font-bold text-gray-800">69.000đ</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Để ủy quyền cho phương thức thanh toán của bạn, bạn sẽ phải trả một số tiền nhỏ và khoản này sẽ được hoàn lại ngay. Có thể mất thêm phí ngân hàng.
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- UPDATED: Button now navigates to the new payment page -->
+                    <button id="start-premium-trial-btn" onclick="showPage('payment-page')" class="w-full bg-[#0259dd] text-white py-4 rounded-lg text-xl font-semibold hover:bg-blue-700 transition shadow-lg">
+                        Dùng thử miễn phí
+                    </button>
+                    <div class="text-center text-sm">
+                        <a href="#" class="text-gray-600 hover:text-[#0259dd] underline">Thanh toán bằng phương thức thanh toán đã chọn</a>
+                    </div>
+                </div>
+
+                <div class="pt-8 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 leading-normal">
+                        Bằng việc tiếp tục, bạn đồng ý với <a href="#" class="text-blue-600 underline">Điều khoản sử dụng</a> áp dụng cho Edukie nâng cao và xác nhận bạn đã đọc <a href="#" class="text-blue-600 underline">Chính sách quyền riêng tư</a> của chúng tôi
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side: Timeline/Visual Offer -->
+            <div class="w-1/2 p-12 bg-gray-100 flex flex-col justify-center items-center relative">
+                
+                <!-- Red Line Timeline -->
+                <div class="absolute inset-y-0 w-1 bg-red-400 my-10"></div>
+                
+                <div class="space-y-16 relative z-10">
+                    
+                    <!-- Step 1: HÔM NAY -->
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-white rounded-full border-4 border-red-400 shadow-lg flex items-center justify-center text-red-500 text-2xl">🎁</div>
+                        <div class="max-w-[12rem]">
+                            <p class="font-bold text-gray-800">Hôm nay - 7 ngày dùng thử miễn phí</p>
+                            <p class="text-sm text-gray-600">Dùng thử những tính năng nổi trội của Edukie</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: 2 NGÀY TRƯỚC -->
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-[#84affb] rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl">🔔</div>
+                        <div class="max-w-[12rem]">
+                            <p class="font-bold text-gray-800">2 ngày trước khi hết gói</p>
+                            <p class="text-sm text-gray-600">Edukie sẽ nhắc bạn 2 ngày trước khi hết hạn dùng thử Edukie nâng cao</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: GÓI NÂNG CAO BẮT ĐẦU -->
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-[#84affb] rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl">🎓</div>
+                        <div class="max-w-[12rem]">
+                            <p class="font-bold text-gray-800">Gói nâng cao bắt đầu</p>
+                            <p class="text-sm text-gray-600">Gói đăng ký bắt đầu, trừ khi bạn hủy trong thời gian dùng thử</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================================================================
+     PAGE 9: PAYMENT METHOD SELECTION PAGE
+     ================================================================ -->
+     <div id="payment-page" class="page hidden">
+        <div class="max-w-2xl mx-auto p-6">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Chọn phương thức thanh toán</h1>
+            <p class="text-sm text-gray-600 mt-1">Thanh toán an toàn – 7 ngày dùng thử miễn phí</p>
+          </div>
+      
+          <!-- Payment Method Cards -->
+          <div class="space-y-4">
+            <!-- MoMo -->
+            <label for="momo" class="payment-card-label block cursor-pointer">
+              <input type="radio" name="payment_method" id="momo" class="hidden" checked>
+              <div class="flex items-center justify-between p-5 rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                  <i data-lucide="smartphone" class="w-8 h-8 text-pink-600"></i>
+                  <div>
+                    <p class="font-medium text-gray-900">MoMo</p>
+                    <p class="text-sm text-gray-500">Thanh toán qua ví điện tử MoMo</p>
+                  </div>
+                </div>
+                <div class="custom-radio-input w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-blue-600 hidden"></div>
+                </div>
+              </div>
+            </label>
+      
+            <!-- Card (Visa/Master) -->
+            <label for="card" class="payment-card-label block cursor-pointer">
+              <input type="radio" name="payment_method" id="card" class="hidden">
+              <div class="flex items-center justify-between p-5 rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                  <i data-lucide="credit-card" class="w-8 h-8 text-gray-700"></i>
+                  <div>
+                    <p class="font-medium text-gray-900">Thẻ tín dụng / Thẻ ghi nợ</p>
+                    <p class="text-sm text-gray-500">Visa, MasterCard, JCB...</p>
+                  </div>
+                </div>
+                <div class="custom-radio-input w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-blue-600 hidden"></div>
+                </div>
+              </div>
+            </label>
+      
+            <!-- Bank Transfer -->
+            <label for="bank" class="payment-card-label block cursor-pointer">
+              <input type="radio" name="payment_method" id="bank" class="hidden">
+              <div class="flex items-center justify-between p-5 rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                  <i data-lucide="landmark" class="w-8 h-8 text-green-600"></i>
+                  <div>
+                    <p class="font-medium text-gray-900">Chuyển khoản ngân hàng</p>
+                    <p class="text-sm text-gray-500">Hỗ trợ mọi ngân hàng Việt Nam</p>
+                  </div>
+                </div>
+                <div class="custom-radio-input w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-blue-600 hidden"></div>
+                </div>
+              </div>
+            </label>
+          </div>
+      
+          <!-- Footer Action -->
+          <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600 mb-4">
+              Thanh toán bằng phương thức đã chọn <a href="#" class="text-blue-600 underline">Sửa</a>
+            </p>
+            <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition">
+              Tiếp tục thanh toán
+            </button>
+          </div>
+      
+          <!-- Trial Info (same as premium card) -->
+          <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+            <ul class="space-y-3 text-sm text-gray-700">
+              <li class="flex items-start">
+                <i data-lucide="check" class="w-5 h-5 text-green-600 mr-2 flex-shrink-0"></i>
+                <span>7 ngày dùng thử miễn phí, hủy bất kỳ lúc nào</span>
+              </li>
+              <li class="flex items-start">
+                <i data-lucide="check" class="w-5 h-5 text-green-600 mr-2 flex-shrink-0"></i>
+                <span>Edukie sẽ nhắc bạn trước khi hết hạn dùng thử</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    
+<!-- 
       ================================================================
       PAGE 8: CHAT APP (Original main page, renamed to chat-page)
       ================================================================
     -->
     <div id="chat-page" class="page w-full h-screen p-4 flex items-center justify-center">
-        <!-- ... (Chat Page Content remains the same) ... -->
+        <!-- Dimming Overlay (for mobile sidebar) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+        
+        <div class="flex h-full max-h-full w-full max-w-7xl">
+            <!-- Left Panel: Chat Interface -->
+            <div class="flex flex-col flex-1 bg-white rounded-2xl shadow-xl border border-gray-200">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800">Gia sư AI Edukie</h2>
+                    
+                    <!-- Hamburger Menu Button (visible on mobile/tablet) -->
+                    <button id="hamburger-btn" class="p-2 -mr-2 md:hidden text-gray-600 hover:text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <!-- Logout Button (visible on desktop) -->
+                    <button id="logout-btn" class="text-sm font-medium text-red-600 hover:underline hidden md:block">Đăng xuất</button>
+                </div>
+                
+                <!-- Payment Status Message Area -->
+                <div id="payment-message" class="hidden p-4 m-4 rounded-lg"></div>
+
+                <!-- Chat Messages -->
+                <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto">
+                    <div class="flex">
+                        <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
+                            <p>Xin chào! Tôi là Edukie. Vui lòng nhập bài tập (hoặc đính kèm hình ảnh) để nhận gợi ý từng bước.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Preview Area -->
+                <div id="image-preview-container" class="p-4 border-t border-gray-200 hidden">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Hình ảnh đính kèm:</p>
+                    <div class="relative w-24 h-24">
+                        <img id="image-preview" src="" alt="Xem trước hình ảnh" class="w-full h-full object-cover rounded-lg border border-gray-300">
+                        <button id="remove-image-btn" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow">×</button>
+                    </div>
+                </div>
+
+                <!-- Chat Input Form -->
+                <form id="chat-form" class="p-4 border-t border-gray-200">
+                    <div class="flex items-center bg-gray-100 rounded-xl p-2">
+                        <!-- This button is now a label for the hidden file input -->
+                        <label for="file-input" class="cursor-pointer p-2 text-gray-500 hover:text-blue-600 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </label>
+                        <!-- Hidden file input -->
+                        <input type="file" id="file-input" class="hidden" accept="image/png, image/jpeg, image/webp">
+                        
+                        <input type="text" id="chat-input" placeholder="Nhập bài tập hoặc câu trả lời của bạn tại đây..." class="flex-1 bg-transparent px-4 py-2 border-none focus:outline-none text-gray-800">
+                        <button type="submit" class="p-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                    </div>
+                    <!-- Updated helper text -->
+                    <p id="chat-state-helper" class="text-xs text-gray-500 mt-2 ml-2">Trạng thái: Sẵn sàng cho bài tập mới.</p>
+                </form>
+            </div>
+
+            <!-- 
+              ================================================================
+              Right Panel / Sidebar
+              ================================================================
+            -->
+            <div id="sidebar" class="w-80 ml-4 flex-shrink-0">
+                <div class="bg-blue-50 h-full rounded-2xl shadow-xl border border-gray-200 p-6 flex flex-col items-center">
+                    <!-- Close Button (visible on mobile/tablet) -->
+                    <button id="close-sidebar-btn" class="absolute top-4 right-4 p-2 md:hidden text-gray-600 hover:text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <div class="w-32 h-32 rounded-full bg-white border-4 border-blue-200 shadow-md mb-4 mt-8 md:mt-0">
+                        <!-- Placeholder for avatar -->
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Tên học sinh</h3>
+                    <p class="text-sm text-blue-600 font-medium">Cấp độ 10</p>
+                    
+                    <!-- Go Premium Button (FIX: Hidden by JS when payments are disabled) -->
+                    <button id="go-premium-btn" class="w-full bg-yellow-400 text-yellow-900 font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition mt-4">
+                        Nâng cấp Premium ✨
+                    </button>
+
+                    <div class="w-full text-left mt-6 text-gray-700 space-y-2">
+                        <p><strong>Trường:</strong> Đại học Hoa Sen</p>
+                        <p><strong>Ngành:</strong> Kinh doanh Quốc tế</p>
+                        <p><strong>Thành viên từ:</strong> 10/2025</p>
+                    </div>
+                    <div class="w-full border-t border-gray-300 my-6"></div>
+                    <!-- Menu -->
+                    <nav class="w-full space-y-2">
+                        <a href="#" class="flex items-center p-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100">
+                            <span class="mr-3">🏆</span> Thành tựu
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100">
+                            <span class="mr-3">🛒</span> Cửa hàng
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100">
+                            <span class="mr-3">🎮</span> Trò chơi
+                        </a>
+                        <a href="#" class="flex items-center p-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100">
+                            <span class="mr-3">📝</span> Nhiệm vụ
+                        </a>
+                    </nav>
+                    <div class="flex-grow"></div>
+                    <!-- Footer Menu -->
+                    <div class="w-full space-y-1">
+                         <a href="#" class="flex items-center p-3 rounded-lg text-sm text-gray-600 hover:bg-blue-100">
+                            Trợ giúp <span class="ml-auto">📞</span>
+                        </a>
+                         <a href="#" class="flex items-center p-3 rounded-lg text-sm text-gray-600 hover:bg-blue-100">
+                            Cài đặt <span class="ml-auto">⚙️</span>
+                        </a>
+                         <a href="#" id="logout-btn-sidebar" class="flex items-center p-3 rounded-lg text-sm text-red-600 hover:bg-red-100">
+                            Đăng xuất <span class="ml-auto">➡️</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- RoadMap Modal (Remains the same) -->
     <div id="roadmap-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
-        <!-- ... (Roadmap Modal Content remains the same) ... -->
-    </div>
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Tạo lộ trình học tập cá nhân hóa</h3>
+            <p class="text-sm text-gray-600 mb-6">Xác định mục tiêu học tập của bạn dưới đây. AI của chúng tôi sẽ phân tích hồ sơ và tạo kế hoạch học tập tùy chỉnh.</p>
+            
+            <form id="roadmap-form" class="space-y-4">
+                <div>
+                    <label for="learning-target-input" class="block text-sm font-medium text-gray-700 mb-1">Mục tiêu học tập</label>
+                    <textarea id="learning-target-input" rows="3" class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ví dụ: Làm chủ tất cả khái niệm giải tích vector trước kỳ thi cuối kỳ."></textarea>
+                </div>
+                
+                <div id="roadmap-status" class="text-sm p-3 rounded-lg hidden"></div>
 
+                <div id="roadmap-display" class="space-y-4 max-h-80 overflow-y-auto p-2 border border-dashed rounded-lg bg-gray-50 hidden">
+                    <h4 class="font-semibold text-blue-600">Lộ trình đã tạo:</h4>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="close-roadmap-btn" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Đóng</button>
+                    <button type="submit" id="generate-roadmap-btn" class="px-4 py-2 text-white bg-blue-600 rounded-lg font-semibold hover:bg-blue-700 transition">Tạo lộ trình</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Link to your JavaScript file using the /static/ path -->
     <script src="/static/app.js" defer></script>

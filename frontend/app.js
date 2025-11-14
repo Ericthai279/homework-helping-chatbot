@@ -1,160 +1,271 @@
-// NOTE: This code block replaces the existing logic in your frontend/app.js file.
+// NOTE: This file replaces the entire content of frontend/static/app.js
+// It already includes the payment-page UI logic, Lucide loading, and activation on page show.
 
 // API Base URL
-const API_BASE_URL = '/api'; 
+const API_BASE_URL = '/api';
 
 // Global state
 let authToken = null;
 let currentExerciseId = null;
-let currentRoadmapJobId = null; 
+let currentRoadmapJobId = null;
+
+// --- Component Templates ---
+const headerTemplate = document.getElementById('global-header-template');
+const footerTemplate = document.getElementById('global-footer-template');
+
+// Inject Header/Footer once per page switch
+function injectGlobalComponents() {
+    document.querySelector('header')?.remove();
+    document.querySelector('footer')?.remove();
+
+    document.body.prepend(headerTemplate.content.cloneNode(true).querySelector('header'));
+    document.body.appendChild(footerTemplate.content.cloneNode(true).querySelector('footer'));
+
+    document.getElementById('global-logout-btn')?.addEventListener('click', handleLogout);
+}
 
 // --- Page Navigation & Auth ---
 function showPage(pageId) {
-    // FIX: Added 'contact-page' to pages that should take full screen
-    if (pageId === 'home-page' || pageId === 'about-page' || pageId === 'service-page' || pageId === 'shop-page' || pageId === 'contact-page' || pageId === 'chat-page') { 
-        document.body.classList.remove('flex', 'items-center', 'justify-center', 'min-h-screen');
-        document.body.classList.add('flex-col');
-    } else {
+    // Layout handling
+    if (pageId === 'login-page' || pageId === 'register-page') {
         document.body.classList.add('flex', 'items-center', 'justify-center', 'min-h-screen');
         document.body.classList.remove('flex-col');
+        document.querySelector('header')?.remove();
+        document.querySelector('footer')?.remove();
+    } else {
+        document.body.classList.remove('flex', 'items-center', 'justify-center', 'min-h-screen');
+        document.body.classList.add('flex-col');
+        injectGlobalComponents();
+        setNavigationActiveState(pageId);
     }
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
+
+    // Activate page
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const activePage = document.getElementById(pageId);
-    if (activePage) {
-        activePage.classList.add('active');
+    if (activePage) activePage.classList.add('active');
+
+    // === PAYMENT PAGE INITIALIZATION ===
+    if (pageId === 'payment-page') {
+        // Load Lucide icons once
+        if (typeof lucide === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+            script.onload = () => lucide.createIcons();
+            document.head.appendChild(script);
+        }
+        setupPaymentPageLogic();
     }
 }
-// ... (loginForm and registerForm event listeners remain the same) ...
 
+// Navigation active state
+function setNavigationActiveState(currentPageId) {
+    const pageKey = currentPageId.replace('-page', '');
+    const header = document.querySelector('header');
+
+    document.querySelectorAll('header nav a').forEach(a => {
+        a.classList.remove('text-[#0259dd]', 'text-white');
+        a.classList.add('text-gray-600');
+    });
+
+    if (header) {
+        if (currentPageId === 'service-page') {
+            header.classList.remove('bg-[#fffdf5]', 'border-gray-200');
+            header.classList.add('bg-[#0259dd]');
+            document.querySelectorAll('header nav a').forEach(a => a.classList.add('text-white/80'));
+            document.getElementById('global-logout-btn')?.classList.remove('text-white', 'bg-[#0259dd]');
+            document.getElementById('global-logout-btn')?.classList.add('bg-white', 'text-[#0259dd]');
+        } else {
+            header.classList.add('bg-[#fffdf5]', 'border-gray-200');
+            header.classList.remove('bg-[#0259dd]');
+            document.getElementById('global-logout-btn')?.classList.remove('bg-white', 'text-[#0259dd]');
+            document.getElementById('global-logout-btn')?.classList.add('bg-[#0259dd]', 'text-white');
+            document.querySelectorAll('header nav a').forEach(a => a.classList.remove('text-white/80'));
+        }
+    }
+
+    const activeLink = document.getElementById(`nav-${pageKey}`);
+    if (activeLink) {
+        activeLink.classList.remove('text-gray-600', 'text-white/80');
+        activeLink.classList.add('font-bold');
+        activeLink.classList.add(currentPageId === 'service-page' ? 'text-white' : 'text-[#0259dd]');
+    }
+}
+
+// --- PAYMENT PAGE LOGIC (FULLY INTEGRATED) ---
+function setupPaymentPageLogic() {
+    const paymentPage = document.getElementById('payment-page');
+    if (!paymentPage) return;
+  
+    // Load Lucide once
+    if (typeof lucide === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+      script.onload = () => lucide.createIcons({ attrs: { width: 24, height: 24 } });
+      document.head.appendChild(script);
+    } else {
+      lucide.createIcons({ attrs: { width: 24, height: 24 } });
+    }
+  
+    const radioInputs = paymentPage.querySelectorAll('input[name="payment_method"]');
+    const paymentLabels = paymentPage.querySelectorAll('.payment-card-label');
+  
+    function updateSelection(selectedId) {
+      paymentLabels.forEach(label => {
+        const input = document.getElementById(label.getAttribute('for'));
+        const radioDot = label.querySelector('.custom-radio-input > div');
+        const card = label.querySelector('div[class*="p-5"]');
+  
+        if (input.id === selectedId) {
+          card.classList.add('border-blue-600', 'shadow-md');
+          card.classList.remove('border-gray-300');
+          radioDot.classList.remove('hidden');
+        } else {
+          card.classList.remove('border-blue-600', 'shadow-md');
+          card.classList.add('border-gray-300');
+          radioDot.classList.add('hidden');
+        }
+      });
+    }
+  
+    // Set initial state
+    const checked = paymentPage.querySelector('input[name="payment_method"]:checked');
+    if (checked) updateSelection(checked.id);
+  
+    // Re-attach listeners (clone to avoid duplicates)
+    radioInputs.forEach(input => input.replaceWith(input.cloneNode(true)));
+    paymentLabels.forEach(label => label.replaceWith(label.cloneNode(true)));
+  
+    // Re-select after cloning
+    const newInputs = paymentPage.querySelectorAll('input[name="payment_method"]');
+    const newLabels = paymentPage.querySelectorAll('.payment-card-label');
+  
+    newInputs.forEach(input => {
+      input.addEventListener('change', () => updateSelection(input.id));
+    });
+  
+    newLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const input = document.getElementById(label.getAttribute('for'));
+        if (input) {
+          input.checked = true;
+          updateSelection(input.id);
+        }
+      });
+    });
+  }
+
+// --- Service Action (Login Required) ---
+function handleServiceAction(action) {
+    if (authToken) {
+        showPage('chat-page');
+    } else {
+        showPage('register-page');
+        const messageEl = document.getElementById('register-form').querySelector('.message');
+        if (messageEl) {
+            messageEl.textContent = 'Please register or log in to use the Chatbot service.';
+            messageEl.style.color = 'orange';
+        }
+    }
+}
+
+// --- Login Form ---
 const loginForm = document.getElementById('login-form');
-loginForm.addEventListener('submit', async (e) => {
+loginForm?.addEventListener('submit', async e => {
     e.preventDefault();
     const formData = new FormData(loginForm);
     const messageEl = loginForm.querySelector('.message');
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/auth/token`, {
             method: 'POST',
             body: formData,
         });
-        
         const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.detail || 'Login failed');
-        }
-        
+        if (!response.ok) throw new Error(data.detail || 'Login failed');
+
         authToken = data.access_token;
         localStorage.setItem('edu-token', authToken);
-        showPage('home-page'); // Go to the new home page
+        showPage('home-page');
         loginForm.reset();
-        if(messageEl) messageEl.textContent = '';
-        
+        if (messageEl) messageEl.textContent = '';
     } catch (error) {
-        if(messageEl) messageEl.textContent = `Error: ${error.message}`;
+        if (messageEl) messageEl.textContent = `Error: ${error.message}`;
     }
 });
 
+// --- Register Form ---
 const registerForm = document.getElementById('register-form');
-registerForm.addEventListener('submit', async (e) => {
+registerForm?.addEventListener('submit', async e => {
     e.preventDefault();
-    
-    // --- Get all new form values ---
     const username = document.getElementById('register-username').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const gender = document.querySelector('input[name="gender"]:checked')?.value;
-    
     const dobDay = document.getElementById('register-dob-day').value.padStart(2, '0');
     const dobMonth = document.getElementById('register-dob-month').value.padStart(2, '0');
     const dobYear = document.getElementById('register-dob-year').value;
-    const date_of_birth = `${dobYear}-${dobMonth}-${dobYear}`;
-
+    const date_of_birth = `${dobYear}-${dobMonth}-${dobDay}`;
     const major = document.getElementById('register-major').value;
     const school = document.getElementById('register-school').value;
     const terms = document.getElementById('register-terms').checked;
-    
     const messageEl = registerForm.querySelector('.message');
 
     if (!terms) {
-        if(messageEl) {
+        if (messageEl) {
             messageEl.textContent = 'Bạn phải đồng ý với Điều khoản sử dụng và Chính sách bảo mật.';
             messageEl.style.color = 'red';
         }
         return;
     }
-    const payload = {
-        email: email,
-        password: password,
-        username: username,
-        gender: gender,
-        date_of_birth: date_of_birth,
-        major: major,
-        school: school
-    };
+
+    const payload = { email, password, username, gender, date_of_birth, major, school };
     try {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
-        
         const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.detail || 'Registration failed');
-        }
-        
-        if(messageEl) {
+        if (!response.ok) throw new Error(data.detail || 'Registration failed');
+
+        if (messageEl) {
             messageEl.textContent = 'Registration successful! Please log in.';
             messageEl.style.color = 'green';
         }
         registerForm.reset();
-        
         setTimeout(() => {
             showPage('login-page');
-            if(messageEl) {
-                messageEl.textContent = '';
-                messageEl.style.color = '';
-            }
+            if (messageEl) { messageEl.textContent = ''; messageEl.style.color = ''; }
         }, 2000);
-        
     } catch (error) {
-        if(messageEl) {
+        if (messageEl) {
             messageEl.textContent = `Error: ${error.message}`;
             messageEl.style.color = 'red';
         }
     }
 });
 
+// --- Logout ---
 function handleLogout() {
     authToken = null;
     localStorage.removeItem('edu-token');
     currentExerciseId = null;
     showPage('login-page');
-    
     const chatMessages = document.getElementById('chat-messages');
     if (chatMessages) {
-        chatMessages.innerHTML = `
-            <div class="flex">
-                <div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow">
-                    <p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p>
-                </div>
-            </div>`;
+        chatMessages.innerHTML = `<div class="flex"><div class="bg-blue-600 text-white p-4 rounded-xl rounded-bl-none max-w-lg shadow"><p>Hello! I'm Edukie. Please enter your exercise (or attach an image) to get step-by-step hints.</p></div></div>`;
     }
     resetChatState();
 }
 
-// --- Image Handling Logic (Converts to Base64) ---
+// --- Image Handling ---
 const fileInput = document.getElementById('file-input');
 const imagePreviewContainer = document.getElementById('image-preview-container');
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image-btn');
-let attachedFileBase64 = null; 
+let attachedFileBase64 = null;
 
-if(fileInput) {
+if (fileInput) {
     fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
         if (file) {
@@ -163,9 +274,8 @@ if(fileInput) {
                 fileInput.value = null;
                 return;
             }
-            
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = e => {
                 const base64String = e.target.result;
                 imagePreview.src = base64String;
                 attachedFileBase64 = base64String.split(',')[1];
@@ -175,58 +285,47 @@ if(fileInput) {
         }
     });
 }
-if(removeImageBtn) {
+if (removeImageBtn) {
     removeImageBtn.addEventListener('click', () => {
         attachedFileBase64 = null;
-        if(fileInput) fileInput.value = null;
-        if(imagePreview) imagePreview.src = "";
-        if(imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
+        if (fileInput) fileInput.value = null;
+        if (imagePreview) imagePreview.src = "";
+        if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
     });
 }
 
-// --- Chat Logic (Tutor Model) ---
+// --- Chat Logic ---
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const chatMessages = document.getElementById('chat-messages');
 const chatStateHelper = document.getElementById('chat-state-helper');
 
-if(chatForm) {
-    chatForm.addEventListener('submit', (e) => {
+if (chatForm) {
+    chatForm.addEventListener('submit', e => {
         e.preventDefault();
         const message = chatInput.value.trim();
-
         if (currentExerciseId) {
-            // --- MODE 1: SUBMITTING AN ANSWER ---
             if (!message) return;
             handleSubmitAnswer(message);
         } else {
-            // --- MODE 2: SUBMITTING A NEW EXERCISE ---
             if (!message && !attachedFileBase64) return;
             handleNewExercise(message, attachedFileBase64);
         }
-        
         chatInput.value = '';
-        if(removeImageBtn) removeImageBtn.click();
+        if (removeImageBtn) removeImageBtn.click();
     });
 }
 
-// Submit a new exercise to get a hint
 async function handleNewExercise(prompt, base64Image) {
-    if (prompt) { addMessage(prompt, 'user'); }
+    if (prompt) addMessage(prompt, 'user');
     if (base64Image) {
         const imageUrl = `data:image/jpeg;base64,${base64Image}`;
         const imageHtml = `<img src="${imageUrl}" alt="Exercise Image" class="w-full h-auto max-w-xs rounded-lg">`;
         addMessage(imageHtml, 'user');
     }
-
-    const chatStateHelper = document.getElementById('chat-state-helper');
     if (chatStateHelper) chatStateHelper.textContent = 'Status: AI is analyzing the exercise...';
-    
-    const payload = {
-        prompt: prompt,
-        base64_image: base64Image
-    };
 
+    const payload = { prompt, base64_image: base64Image };
     try {
         const response = await fetch(`${API_BASE_URL}/exercises/`, {
             method: 'POST',
@@ -236,16 +335,13 @@ async function handleNewExercise(prompt, base64Image) {
             },
             body: JSON.stringify(payload)
         });
-        
         const data = await response.json();
-        if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
+        if (!response.ok) throw new Error(data.detail || 'Unknown error');
 
         addMessage(data.interactions[0].ai_response, 'ai');
-        
         currentExerciseId = data.id;
         if (chatStateHelper) chatStateHelper.textContent = `Status: Working on Exercise #${data.id}. Please enter your answer.`;
-        if(fileInput) fileInput.disabled = true;
-
+        if (fileInput) fileInput.disabled = true;
     } catch (error) {
         addMessage(`Error: ${error.message}`, 'ai', 'error');
         resetChatState();
@@ -253,10 +349,8 @@ async function handleNewExercise(prompt, base64Image) {
     }
 }
 
-// Submit an answer to be checked
 async function handleSubmitAnswer(answer) {
     addMessage(answer, 'user');
-    const chatStateHelper = document.getElementById('chat-state-helper');
     if (chatStateHelper) chatStateHelper.textContent = 'Status: AI is checking your answer...';
 
     try {
@@ -266,14 +360,12 @@ async function handleSubmitAnswer(answer) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ answer: answer })
+            body: JSON.stringify({ answer })
         });
-
         const data = await response.json();
-        if (!response.ok) { throw new Error(data.detail || 'Unknown error'); }
+        if (!response.ok) throw new Error(data.detail || 'Unknown error');
 
         addMessage(data.check_response, 'ai', data.is_correct ? 'success' : 'normal');
-
         if (data.is_correct) {
             if (data.suggested_exercise) {
                 addMessage("Good job! Here is a similar exercise for you to practice:\n\n" + data.suggested_exercise, 'ai');
@@ -282,7 +374,6 @@ async function handleSubmitAnswer(answer) {
         } else {
             if (chatStateHelper) chatStateHelper.textContent = `Status: Working on Exercise #${currentExerciseId}. Please try again.`;
         }
-
     } catch (error) {
         addMessage(`Error: ${error.message}`, 'ai', 'error');
         if (chatStateHelper) chatStateHelper.textContent = 'Status: An error occurred.';
@@ -290,169 +381,52 @@ async function handleSubmitAnswer(answer) {
     }
 }
 
-// Reset chat state
 function resetChatState() {
     currentExerciseId = null;
-    const chatStateHelper = document.getElementById('chat-state-helper');
     if (chatStateHelper) chatStateHelper.textContent = 'Status: Ready for a new exercise.';
-    if(fileInput) fileInput.disabled = false;
+    if (fileInput) fileInput.disabled = false;
 }
 
-// --- addMessage Function (handles message display) ---
 function addMessage(text, sender = 'ai', type = 'normal') {
-    const chatMessages = document.getElementById('chat-messages');
-    if (!chatMessages) return; 
-
+    if (!chatMessages) return;
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('flex', 'w-full');
-    
+
     let bubbleClasses = 'p-4 rounded-xl max-w-lg shadow ';
-    
     if (sender === 'user') {
         messageDiv.classList.add('justify-end');
         bubbleClasses += 'bg-gray-200 text-gray-800 rounded-br-none';
     } else {
-        if (type === 'error') {
-            bubbleClasses += 'bg-red-500 text-white rounded-bl-none';
-        } else if (type === 'success') {
-            bubbleClasses += 'bg-green-500 text-white rounded-bl-none';
-        } else {
-            bubbleClasses += 'bg-blue-600 text-white rounded-bl-none';
-        }
+        if (type === 'error') bubbleClasses += 'bg-red-500 text-white rounded-bl-none';
+        else if (type === 'success') bubbleClasses += 'bg-green-500 text-white rounded-bl-none';
+        else bubbleClasses += 'bg-blue-600 text-white rounded-bl-none';
     }
-    
+
     messageDiv.innerHTML = `<div class="${bubbleClasses}">${
         sender === 'user' && text.startsWith('<img') ? text : `<p style="white-space: pre-wrap;">${text}</p>`
     }</div>`;
     chatMessages.appendChild(messageDiv);
-    
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// --- Utility (Token Check) ---
 function checkToken(error) {
     if (error.message.includes('401') || error.message.includes('Could not validate credentials')) {
         handleLogout();
     }
 }
 
-// --- ROADMAP HANDLER FUNCTIONS ---
-
-// Function to handle the form submission and start the roadmap job
-async function handleRoadmapRequest(e) {
-    e.preventDefault();
-    const target = document.getElementById('learning-target-input').value.trim();
-    const statusEl = document.getElementById('roadmap-status');
-    const displayEl = document.getElementById('roadmap-display');
-    const generateBtn = document.getElementById('generate-roadmap-btn');
-
-    if (!target) {
-        statusEl.textContent = 'Please enter your learning target.';
-        statusEl.classList.remove('hidden');
-        statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
-        return;
-    }
-    
-    // Reset previous status/display
-    statusEl.textContent = 'Starting roadmap generation...';
-    statusEl.classList.remove('hidden', 'bg-red-100', 'bg-green-100');
-    statusEl.classList.add('bg-blue-100', 'text-blue-700');
-    displayEl.classList.add('hidden');
-    displayEl.innerHTML = '<h4 class="font-semibold text-blue-600">Generated Roadmap:</h4>';
-    generateBtn.disabled = true;
-
-    try {
-        // 1. Create the roadmap job
-        let response = await fetch(`${API_BASE_URL}/roadmaps/create`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ learning_target: target })
-        });
-        
-        let data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Failed to start roadmap job.');
-        }
-
-        currentRoadmapJobId = data.job_id;
-        statusEl.textContent = `Roadmap job created (${currentRoadmapJobId}). Status: Pending...`;
-        
-        // 2. Poll for the status
-        const pollingInterval = 3000; // Check every 3 seconds
-
-        const checkStatus = setInterval(async () => {
-            let statusResponse = await fetch(`${API_BASE_URL}/roadmaps/${currentRoadmapJobId}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            let statusData = await statusResponse.json();
-
-            statusEl.textContent = `Roadmap job (${statusData.job_id}). Status: ${statusData.status}...`;
-
-            if (statusData.status === 'completed') {
-                clearInterval(checkStatus);
-                statusEl.textContent = 'Roadmap successfully generated!';
-                statusEl.classList.remove('bg-blue-100');
-                statusEl.classList.add('bg-green-100', 'text-green-700');
-                
-                // Display the roadmap text
-                if (statusData.roadmap_data && statusData.roadmap_data.roadmap_text) {
-                    const roadmapText = statusData.roadmap_data.roadmap_text;
-                    const formattedHtml = roadmapText.replace(/\n/g, '<br>');
-                    displayEl.innerHTML += `<p class="whitespace-pre-wrap text-gray-700 mt-2">${formattedHtml}</p>`;
-                    displayEl.classList.remove('hidden');
-                } else {
-                    displayEl.innerHTML += '<p class="text-red-500 mt-2">Error: Could not retrieve roadmap data.</p>';
-                }
-                generateBtn.disabled = false;
-
-            } else if (statusData.status === 'failed') {
-                clearInterval(checkStatus);
-                statusEl.textContent = `Roadmap job failed: ${statusData.error || 'Unknown server error.'}`;
-                statusEl.classList.remove('bg-blue-100');
-                statusEl.classList.add('bg-red-100', 'text-red-700');
-                generateBtn.disabled = false;
-            }
-
-        }, pollingInterval);
-
-
-    } catch (error) {
-        statusEl.textContent = `Error: ${error.message}`;
-        statusEl.classList.remove('bg-blue-100');
-        statusEl.classList.add('bg-red-100', 'text-red-700');
-        generateBtn.disabled = false;
-        checkToken(error);
-    }
-}
-
 // --- Initial Load ---
 function init() {
-    // --- Populate Date of Birth Dropdowns ---
+    // Populate DOB dropdowns
     const daySelect = document.getElementById('register-dob-day');
     const monthSelect = document.getElementById('register-dob-month');
     const yearSelect = document.getElementById('register-dob-year');
-
-    if(daySelect && monthSelect && yearSelect) {
-        // Populate Days (value is "1", "2", etc.)
-        for (let i = 1; i <= 31; i++) {
-            daySelect.innerHTML += `<option value="${i}">${i}</option>`;
-        }
-        // Populate Months (value is "1", "2", etc.)
-        for (let i = 1; i <= 12; i++) {
-            monthSelect.innerHTML += `<option value="${i}">${i}</option>`;
-        }
-        // Populate Years (e.g., from 1950 to 2010)
+    if (daySelect && monthSelect && yearSelect) {
+        for (let i = 1; i <= 31; i++) daySelect.innerHTML += `<option value="${i}">${i}</option>`;
+        for (let i = 1; i <= 12; i++) monthSelect.innerHTML += `<option value="${i}">${i}</option>`;
         const currentYear = new Date().getFullYear();
-        for (let i = currentYear - 15; i >= currentYear - 75; i--) {
-            yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
-        }
+        for (let i = currentYear - 15; i >= currentYear - 75; i--) yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
     }
-    // --- End of DOB Population ---
-
 
     const token = localStorage.getItem('edu-token');
     if (token) {
@@ -461,78 +435,48 @@ function init() {
     } else {
         showPage('login-page');
     }
-    
-    // --- Logout Button Listeners ---
-    const logoutBtn = document.getElementById('logout-btn');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
-    const logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
-    if(logoutBtnSidebar) {
-        logoutBtnSidebar.addEventListener('click', handleLogout);
-    }
-    const navLogoutBtn = document.getElementById('nav-logout-btn');
-    if(navLogoutBtn) {
-        navLogoutBtn.addEventListener('click', handleLogout);
-    }
 
-    // --- Sidebar Toggle Logic ---
+    // Logout listeners
+    document.getElementById('nav-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('about-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('service-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('shop-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('contact-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('global-logout-btn')?.addEventListener('click', handleLogout);
+
+    // Sidebar toggle
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
 
-    if (hamburgerBtn && sidebar && overlay) {
-        hamburgerBtn.addEventListener('click', () => {
-            sidebar.classList.add('open');
-            overlay.classList.remove('hidden');
-        });
-    }
+    hamburgerBtn?.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.remove('hidden');
+    });
+    closeSidebarBtn?.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+    });
+    overlay?.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+    });
 
-    if (closeSidebarBtn && sidebar && overlay) {
-        closeSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.add('hidden');
-        });
-    }
-    
-    if (overlay && sidebar) {
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.add('hidden');
-        });
-    }
-
-    // --- ROADMAP LISTENERS (NEW) ---
+    // Roadmap modal
     const roadmapModal = document.getElementById('roadmap-modal');
-    const roadmapForm = document.getElementById('roadmap-form');
     const goPremiumBtn = document.getElementById('go-premium-btn');
     const closeRoadmapBtn = document.getElementById('close-roadmap-btn');
+    const roadmapForm = document.getElementById('roadmap-form');
 
-    // Show modal when "Go Premium" is clicked (to test roadmap feature)
-    if (goPremiumBtn) {
-        // The payments are disabled, so we reuse this button for the roadmap feature test
-        goPremiumBtn.addEventListener('click', () => {
-            if (roadmapModal) roadmapModal.classList.remove('hidden');
-            // Ensure status and display are reset when opened
-            document.getElementById('roadmap-status').classList.add('hidden');
-            document.getElementById('roadmap-display').classList.add('hidden');
-            document.getElementById('generate-roadmap-btn').disabled = false;
-        });
-    }
-
-    // Close modal
-    if (closeRoadmapBtn && roadmapModal) {
-        closeRoadmapBtn.addEventListener('click', () => {
-            roadmapModal.classList.add('hidden');
-        });
-    }
-
-    // Handle form submission
-    if (roadmapForm) {
-        roadmapForm.addEventListener('submit', handleRoadmapRequest);
-    }
+    goPremiumBtn?.addEventListener('click', () => {
+        roadmapModal.classList.remove('hidden');
+        document.getElementById('roadmap-status').classList.add('hidden');
+        document.getElementById('roadmap-display').classList.add('hidden');
+        document.getElementById('generate-roadmap-btn').disabled = false;
+    });
+    closeRoadmapBtn?.addEventListener('click', () => roadmapModal.classList.add('hidden'));
+    roadmapForm?.addEventListener('submit', handleRoadmapRequest);
 }
-// --- END OF UPDATED FUNCTION ---
 
 init();
