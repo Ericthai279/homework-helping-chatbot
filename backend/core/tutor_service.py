@@ -1,5 +1,4 @@
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI # CORRECT GEMINI IMPORT
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -20,7 +19,6 @@ class TutorService:
         """
         Load the multimodal (image + text) model using Gemini 2.5 Flash.
         """
-        # FIX 1: Use the correct model and refer to GOOGLE_API_KEY
         return ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
             google_api_key=os.getenv("GOOGLE_API_KEY")
@@ -31,8 +29,6 @@ class TutorService:
         """
         Load a faster, text-only model using Gemini 2.5 Flash-Lite.
         """
-        # FIX 2: Switched this back to the faster, text-only Gemini model 
-        # (Since you are transitioning to Gemini and the OpenAI key is not working)
         return ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite", 
             google_api_key=os.getenv("GOOGLE_API_KEY")
@@ -40,12 +36,10 @@ class TutorService:
 
     @classmethod
     async def get_initial_guidance(cls, prompt: str, base64_image: str | None = None) -> str:
-        # Use the multimodal method (which uses the Gemini key)
         llm = cls._get_llm_multimodal() 
         message_content = []
         
         if base64_image:
-            # If there's an image, use the multimodal prompt
             message_content.append(SystemMessage(content=prompts.GUIDANCE_PROMPT_WITH_IMAGE))
             message_content.append(HumanMessage(
                 content=[
@@ -57,7 +51,6 @@ class TutorService:
                 ]
             ))
         else:
-            # If text only, use the faster text model
             llm = cls._get_llm_text_only() 
             message_content.append(SystemMessage(content=prompts.GUIDANCE_PROMPT.format(exercise_content=prompt)))
 
@@ -67,7 +60,6 @@ class TutorService:
     @classmethod
     async def check_user_answer(cls, exercise_content: str, user_answer: str) -> CheckAnswerLLM:
         llm = cls._get_llm_text_only()
-        # Use PydanticOutputParser for structured JSON output
         parser = PydanticOutputParser(pydantic_object=CheckAnswerLLM)
         prompt = ChatPromptTemplate.from_template(prompts.CHECK_ANSWER_PROMPT)
         chain = prompt | llm | parser
