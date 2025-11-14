@@ -2,6 +2,17 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: #f7f9fc;
 }
+
+/* FIX: CRITICAL CSS RULE to prevent page overlap */
+.page {
+    display: none !important; 
+}
+.page.active {
+    display: block !important; 
+}
+/* END FIX */
+
+
 /* Custom scrollbar for chat */
 #chat-messages::-webkit-scrollbar {
     width: 6px;
@@ -17,14 +28,7 @@ body {
 #chat-messages::-webkit-scrollbar-thumb:hover {
     background: #a5aab1;
 }
-.page {
-    display: none; /* Hide all pages by default */
-}
-.page.active {
-    display: block; /* Show active page */
-}
 
-/* --- THIS IS NEW --- */
 /* Sidebar Styles */
 
 /* By default, sidebar is off-screen to the right on mobile/tablet */

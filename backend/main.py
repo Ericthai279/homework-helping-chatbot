@@ -1,14 +1,14 @@
+import pathlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import os # Import os
+import os # Need os for path joining
 
 from core.config import settings
 from db.database import create_tables
-from routers import auth, exercise, roadmap
-
-# payments 
+# FIX: Only import active routers
+from routers import auth, exercise, roadmap 
 
 # Create all database tables (if they don't exist)
 create_tables()
@@ -21,33 +21,33 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# --- FIX: Define Base Directories Robustly ---
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+
 # --- API Routers ---
-# All your API routes are prefixed with /api
 app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(exercise.router, prefix=settings.API_PREFIX)
 app.include_router(roadmap.router, prefix=settings.API_PREFIX)
-# app.include_router(payments.router, prefix=settings.API_PREFIX)
 
 # --- Frontend Serving ---
 
-# Define the path to the frontend folder
-# It's one directory up ("..") from this file's directory ("backend")
-frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+# 1. Mount the frontend assets (CSS, JS) under /static
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
-# 1. Mount the 'frontend' folder as '/static'
-# This serves app.js, style.css, etc.
-app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
-
-# 2. Serve the index.html file for the root path
+# 2. Serve the main index.html file for the root path
 @app.get("/")
 async def read_index():
-    index_path = os.path.join(frontend_dir, "index.html")
+    index_path = FRONTEND_DIR / "index.html"
+    # This check is vital for local and deployed safety
+    if not index_path.exists():
+        return {"message": "Frontend index.html not found on server."} 
     return FileResponse(index_path)
 
 # --- Middleware (CORS) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
