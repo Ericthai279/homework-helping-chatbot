@@ -122,6 +122,7 @@ function setNavigationActiveState(currentPageId) {
     }
 }
 
+
 function setupPaymentPageLogic() {
     const paymentPage = document.getElementById('payment-page');
     if (!paymentPage) return;
